@@ -41,6 +41,33 @@ interface GraphData {
   links: Link[];
 }
 
+function insertLineBreaks(text: string, maxLength = 40) {
+  let words = text.split(' ');
+  let result = '';
+  let lineLength = 0;
+
+  words.forEach(word => {
+    if (lineLength + word.length + 1 > maxLength) {
+      // If adding the word exceeds the maxLength, add a line break
+      result += '\n';
+      lineLength = 0;
+    }
+    // Add the word to the result
+    if (lineLength > 0) {
+      result += ' '; // Add space between words
+      lineLength++;
+    }
+    result += word;
+    lineLength += word.length;
+  });
+
+  return result;
+}
+
+// Example usage:
+const text = "This is a test string to demonstrate how line breaks are inserted after exceeding forty characters.";
+console.log(insertLineBreaks(text));
+
 const NetworkGraph: React.FC = () => {
   const graphRef = useRef<HTMLDivElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -83,14 +110,14 @@ const NetworkGraph: React.FC = () => {
               const imgTexture = new THREE.TextureLoader().load(typedNode.profile_picture);
               const imgMaterial = new THREE.SpriteMaterial({ map: imgTexture });
               const sprite = new THREE.Sprite(imgMaterial);
-              sprite.scale.set(20, 20, 1);
-              sprite.position.set(-15, 10, 0);
+              sprite.scale.set(15, 15, 1);
+              sprite.position.set(-20, 20, 0);
               nodeGroup.add(sprite);
             }
         
-            const labelText = `${typedNode.individual_name}\n${typedNode.group_name}\n${typedNode.summarized_description}`;
+            const labelText = `${typedNode.individual_name}\n${typedNode.group_name}\n${insertLineBreaks(typedNode.summarized_description)}`;
             const label = createTextSprite(labelText, { fontsize: 50 });
-            label.position.set(-15, 10, 0);
+            label.position.set(20, 20, 0);
             nodeGroup.add(label);
         
             return nodeGroup;
