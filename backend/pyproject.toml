@@ -6,3 +6,18 @@ exclude = [
     ".venv",
 ]
 per-file-ignores = { "__init__.py" = ["F401"] }
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["“kellyhongsn” <kellyhongsn@berkeley.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+uagents = "^0.16.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
