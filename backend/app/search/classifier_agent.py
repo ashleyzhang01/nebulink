@@ -1,13 +1,29 @@
 from uagents import Agent, Context
- 
-# Create an agent named Alice
-alice = Agent(name="alice", seed="a new phrase")
- 
-# Define a periodic task for Alice
-@alice.on_interval(period=2.0)
-async def say_hello(ctx: Context):
-    ctx.logger.info(f'hello, my name is {alice.name}')
- 
-# Run the agent
-if __name__ == "__main__":
-    alice.run()
+from uagents import Model
+import os
+
+
+class Message(Model):
+    message: str
+
+
+Gemini_Address = os.getenv("GEMINI_ADDRESS")
+
+user = Agent(
+    name="user",
+    port=8000,
+    seed="user secret phrase",
+    endpoint=["http://localhost:8000/submit"],
+)
+
+@user.on_event("startup")
+async def agent_address(ctx: Context):
+    ctx.logger.info(user.address)
+    message = str(input("You:"))
+    await ctx.send(Gemini_Address, Message(message=message))
+
+
+@user.on_message(model=Message)
+async def handle_query_response(ctx: Context, sender: str, msg: Message):
+    message = str(input("You:"))
+    await ctx.send(sender, Message(message=message))
