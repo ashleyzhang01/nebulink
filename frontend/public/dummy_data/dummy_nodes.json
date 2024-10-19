@@ -1,0 +1,80 @@
+[
+    { 
+        "id": 1, 
+        "is_linkedin": true, 
+        "group_name": "Company 1", 
+        "individual_name": "Person 1", 
+        "summarized_description": "this is a summarized description for person 1 that mentions their company and relevant experience", 
+        "comprehensive_description": "a more detailed description", 
+        "email": "person1@gmail.com", 
+        "profile_picture": "/dummy_data/imgs/cat.jpg", 
+        "link": "https://www.linkedin.com/", 
+        "connection_order": 1,
+        "corresponding_node": 3
+    },
+    { 
+        "id": 2, 
+        "is_linkedin": true, 
+        "group_name": "Company 1", 
+        "individual_name": "Person 2", 
+        "summarized_description": "this is a summarized description for person 2 that mentions their company and relevant experience", 
+        "comprehensive_description": "a more detailed description", 
+        "email": "person2@gmail.com", 
+        "profile_picture": "/dummy_data/imgs/panda.jpg", 
+        "link": "https://www.linkedin.com/", 
+        "connection_order": 2,
+        "corresponding_node": null
+    },
+    {
+        "id": 3, 
+        "is_linkedin": false, 
+        "group_name": "Repo 1", 
+        "individual_name": "Person 1", 
+        "summarized_description": "this is a summarized description for person 1 that mentions their relevant experience and contribution to this github repo", 
+        "comprehensive_description": "a more detailed description", 
+        "email": "person1@gmail.com", 
+        "profile_picture": "/dummy_data/imgs/cat.jpg", 
+        "link": "https://www.github.com/", 
+        "connection_order": 1,
+        "corresponding_node": 1
+    },
+    { 
+        "id": 4, 
+        "is_linkedin": true, 
+        "group_name": "Company 1", 
+        "individual_name": "Person 3", 
+        "summarized_description": "this is a summarized description for person 3 that mentions their company and relevant experience", 
+        "comprehensive_description": "a more detailed description", 
+        "email": "person3@gmail.com", 
+        "profile_picture": "/dummy_data/imgs/tiger.jpg", 
+        "link": "https://www.linkedin.com/", 
+        "connection_order": 2,
+        "corresponding_node": null
+    },
+    { 
+        "id": 5, 
+        "is_linkedin": false, 
+        "group_name": "Repo 1", 
+        "individual_name": "Person 4", 
+        "summarized_description": "this is a summarized description for person 4 that mentions their company and relevant experience", 
+        "comprehensive_description": "a more detailed description", 
+        "email": "person4@gmail.com", 
+        "profile_picture": "/dummy_data/imgs/whale.jpg", 
+        "link": "https://www.github.com/", 
+        "connection_order": 2,
+        "corresponding_node": null
+    },
+    {
+        "id": 6, 
+        "is_linkedin": false, 
+        "group_name": "Company 2", 
+        "individual_name": "Person 5", 
+        "summarized_description": "this is a summarized description for person 1 that mentions their relevant experience and contribution to this github repo", 
+        "comprehensive_description": "a more detailed description", 
+        "email": "person1@gmail.com", 
+        "profile_picture": "/dummy_data/imgs/dog.jpg", 
+        "link": "https://www.linkedin.com/", 
+        "connection_order": 1,
+        "corresponding_node": null
+    }
+]
