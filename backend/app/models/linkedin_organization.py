@@ -17,4 +17,4 @@ class LinkedinOrganization(Base):
     logo = Column(String, nullable=True)
     filters = Column(JSON, nullable=True)
 
-    linkedin_users = relationship("LinkedinUser", secondary="linkedin_user_organization_map", back_populates="organizations")
+    user_maps = relationship("LinkedinUserOrganizationMap", back_populates="linkedin_organization")

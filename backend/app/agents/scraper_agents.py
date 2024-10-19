@@ -8,21 +8,25 @@ from app.agents.github_scraper_agent_helper import get_github_user_2_degree_netw
 import asyncio
 
 
-github_agent = Agent(
-    name="github_scraper",
+agent = Agent(
+    name="scraper",
     port=8001,
     seed="github_scraper_seed",
     endpoint="http://localhost:8001/submit",
 )
 
 
-GITHUB_AGENT_ADDRESS = None
+AGENT_ADDRESS = None
 
 
 class GithubRequest(Model):
     username: str
     token: Optional[str] = None
 
+
+class LinkedinRequest(Model):
+    email: str
+    password: str
 
 class Response(Model):
     text: str
@@ -45,23 +49,22 @@ class Response(Model):
 #         ctx.logger.error(f"Error during daily scrape: {str(e)}")
 
 
-@github_agent.on_event("startup")
+@agent.on_event("startup")
 async def startup(ctx: Context):
-    global GITHUB_AGENT_ADDRESS
-    ctx.logger.info(f"Starting up {github_agent.name}")
-    ctx.logger.info(f"With address: {github_agent.address}")
-    GITHUB_AGENT_ADDRESS = github_agent.address
-    ctx.logger.info(f"And wallet address: {github_agent.wallet.address()}")
+    global AGENT_ADDRESS
+    ctx.logger.info(f"Starting up {agent.name}")
+    ctx.logger.info(f"With address: {agent.address}")
+    AGENT_ADDRESS = agent.address
+    ctx.logger.info(f"And wallet address: {agent.wallet.address()}")
 
 
-@github_agent.on_query(model=GithubRequest, replies={Response})
+@agent.on_query(model=GithubRequest, replies={Response})
 async def query_handler(ctx: Context, sender: str, _query: GithubRequest):
     ctx.logger.info("Query received")
     try:
         db = SessionLocal()
         try:
-            if _query.username:
-                get_github_user_2_degree_network(_query.username, _query.token, db)
+            get_github_user_2_degree_network(_query.username, _query.token, db)
             await ctx.send(sender, Response(text="success"))
         finally:
             db.close()
@@ -70,5 +73,21 @@ async def query_handler(ctx: Context, sender: str, _query: GithubRequest):
         ctx.logger.error(f"Error processing query: {str(e)}")
         await ctx.send(sender, Response(text="fail"))
  
+
+@agent.on_query(model=LinkedinRequest, replies={Response})
+async def linkedin_query_handler(ctx: Context, sender: str, _query: LinkedinRequest):
+    ctx.logger.info("Linkedin query received")
+    try:
+        db = SessionLocal()
+        try:
+            get_linkedin_user_2_degree_network(_query.email, _query.password, db)
+            await ctx.send(sender, Response(text="success"))   
+        finally:
+            db.close()
+    except Exception as e:
+        ctx.logger.error(f"Error processing query: {str(e)}")
+        await ctx.send(sender, Response(text="fail"))
+
+
 if __name__ == "__main__":
-    github_agent.run()
+    agent.run()

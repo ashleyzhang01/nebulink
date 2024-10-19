@@ -3,8 +3,11 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict
 
 
-if typing.TYPE_CHECKING:
-    from app.schemas.linkedin_user import LinkedinUser
+class LinkedinUserContribution(BaseModel):
+    username: str
+    role: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 class LinkedinOrganizationBase(BaseModel):
@@ -37,7 +40,7 @@ class LinkedinOrganizationUpdate(BaseModel):
 
 
 class LinkedinOrganization(LinkedinOrganizationBase):
-    linkedin_users: List['LinkedinUser'] = []
+    linkedin_users: List[LinkedinUserContribution] = []
 
     class Config:
         from_attributes = True

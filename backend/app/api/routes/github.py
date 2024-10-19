@@ -42,6 +42,7 @@ async def create_github_user(
         # update user id association
         new_github_user = existing_github_user
         new_github_user.user_id = current_user.id
+        new_github_user.token = github_user.token
         update_github_user(new_github_user, db)
     else:
         new_github_user = GithubUser(
@@ -67,7 +68,6 @@ async def create_github_user(
         db.commit()
         raise HTTPException(status_code=500, detail=f"Error calling agent: {str(e)}")
 
-    db.refresh(new_github_user)
     return new_github_user
 
 
@@ -95,8 +95,28 @@ async def sync_github_user(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calling agent: {str(e)}")
 
-    db.refresh(existing_github_user)
     return existing_github_user
+
+
+@router.put("/update", response_model=GithubUserSchema)
+async def update_github_user(
+    github_user_update: GithubUserCreate,
+    db: Session = Depends(get_db)
+):
+    github_user_update_dict = github_user_update.dict()
+    print("Github user update dict: ", github_user_update_dict)
+    github_user = db.query(GithubUser).filter(
+        GithubUser.username == github_user_update_dict["username"],
+    ).first()
+    if not github_user:
+        raise HTTPException(status_code=404, detail="GitHub user not found")
+    for key, value in github_user_update_dict.items():
+        if value is not None:
+            setattr(github_user, key, value)
+    db.commit()
+    db.refresh(github_user)
+    return github_user
+
 
 @router.get("/repositories", response_model=List[RepositorySchema])
 async def get_all_repos(

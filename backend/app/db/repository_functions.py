@@ -1,11 +1,28 @@
+import requests
+
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import set_attribute
 from fastapi import Depends
 from typing import List
+from app.chromadb import get_chroma_collection
 from app.models.repository import Repository as RepositoryModel
 from app.models.github_user import GithubUserRepositoryMap
 from app.schemas.repository import Repository as RepositorySchema, GithubUserContribution
 from app.db.session import get_db
+from app.utils.enums import ChromaCollections
+
+
+"""
+Some repos have a main branch of `main`, and some `master`. Some repos
+(e.g. Linus Torvalds) have a README that is plaintext, and some are markdown.
+"""
+BASE_GITHUB_PATHS = [
+    "https://raw.githubusercontent.com/{path}/refs/heads/master/README",
+    "https://raw.githubusercontent.com/{path}/refs/heads/master/README.md",
+    "https://raw.githubusercontent.com/{path}/refs/heads/main/README",
+    "https://raw.githubusercontent.com/{path}/refs/heads/main/README.md",
+]
+
 
 def get_repository_by_path(path: str, db: Session = Depends(get_db)) -> RepositorySchema | None:
     db_repository = db.query(RepositoryModel).filter(RepositoryModel.path == path).first()
@@ -42,6 +59,16 @@ def get_all_repositories(db: Session) -> List[RepositorySchema]:
     ]
 
 def create_repository(repository: RepositorySchema, db: Session) -> RepositorySchema:
+    # Create repository in chroma DB with path as the ID
+    readme_string = get_readme_by_path(path=repository.path)
+    github_collection = get_chroma_collection(
+        collection=ChromaCollections.GITHUB_REPOSITORY,
+    )
+    github_collection.upsert(
+        documents=[readme_string],
+        ids=[repository.path],
+    )
+    # Create repository in primary DB
     db_repository = RepositoryModel(
         path=repository.path,
         description=repository.description,
@@ -93,3 +120,23 @@ def add_user_to_repository(repository_path: str, github_username: str, num_contr
             db.refresh(db_repository)
             return get_repository_by_path(repository_path, db)
     return None
+
+def get_readme_by_path(path: str) -> str | None:
+    """
+    Given different possible paths to READMEs for a repo, try fetching each one
+    and return the first valid README content found. If no README is found, return None.
+    """
+    for base_path in BASE_GITHUB_PATHS:
+        url = base_path.format(path=path)  # Format the URL with the provided path
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"Success! Found README at {url}")
+                return response.text  # Return the README content
+
+        except requests.RequestException as e:
+            print(f"Error fetching README from {url}: {e}")
+
+    # If no valid README is found, return an empty string
+    print("No valid README found")
+    return ""
