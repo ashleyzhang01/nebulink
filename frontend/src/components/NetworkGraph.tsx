@@ -42,7 +42,7 @@ interface GraphData {
 }
 
 function insertLineBreaks(text: string, maxLength = 40) {
-  let words = text.split(' ');
+  const words = text.split(' ');
   let result = '';
   let lineLength = 0;
 

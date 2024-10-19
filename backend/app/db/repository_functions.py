@@ -42,6 +42,12 @@ def get_repository_by_path(path: str, db: Session = Depends(get_db)) -> Reposito
         )
     return None
 
+
+def get_repositories_by_github_user(username: str, db: Session) -> List[RepositorySchema]:
+    user_repo_maps = db.query(GithubUserRepositoryMap).filter(GithubUserRepositoryMap.github_user_username == username).all()
+    return [get_repository_by_path(user_repo_map.repository_path, db) for user_repo_map in user_repo_maps]
+
+
 def get_all_repositories(db: Session) -> List[RepositorySchema]:
     db_repositories = db.query(RepositoryModel).all()
     return [
@@ -58,9 +64,9 @@ def get_all_repositories(db: Session) -> List[RepositorySchema]:
         ) for repo in db_repositories
     ]
 
-def create_repository(repository: RepositorySchema, db: Session) -> RepositorySchema:
+def create_repository(repository: RepositorySchema, token: str | None, db: Session) -> RepositorySchema:
     # Create repository in chroma DB with path as the ID
-    readme_string = get_readme_by_path(path=repository.path)
+    readme_string = get_readme_by_path(path=repository.path, token=token)
     github_collection = get_chroma_collection(
         collection=ChromaCollections.GITHUB_REPOSITORY,
     )
@@ -121,13 +127,15 @@ def add_user_to_repository(repository_path: str, github_username: str, num_contr
             return get_repository_by_path(repository_path, db)
     return None
 
-def get_readme_by_path(path: str) -> str | None:
+def get_readme_by_path(path: str, token: str | None) -> str | None:
     """
     Given different possible paths to READMEs for a repo, try fetching each one
     and return the first valid README content found. If no README is found, return None.
     """
     for base_path in BASE_GITHUB_PATHS:
         url = base_path.format(path=path)  # Format the URL with the provided path
+        if token:
+            url = f"{url}?token={token}"
         try:
             response = requests.get(url)
             if response.status_code == 200:
