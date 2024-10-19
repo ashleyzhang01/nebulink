@@ -12,6 +12,9 @@ class LinkedinUserOrganizationMap(Base):
     end_date = Column(DateTime, nullable=True)
     role = Column(String, nullable=True)
 
+    linkedin_user = relationship("LinkedinUser", back_populates="organization_maps")
+    linkedin_organization = relationship("LinkedinOrganization", back_populates="user_maps")
+
 
 class LinkedinUser(Base):
     __tablename__ = "linkedin_users"
@@ -22,7 +25,7 @@ class LinkedinUser(Base):
     profile_picture = Column(String, nullable=True)
     email = Column(String, nullable=True)
     external_websites = Column(String, nullable=True)  # Store as JSON string
-    password = Column(String, nullable=True)
+    password = Column(String, nullable=True)  # hashed
 
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     user = relationship("User", back_populates="linkedin_user", uselist=False)

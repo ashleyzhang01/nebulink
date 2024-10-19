@@ -4,8 +4,14 @@ from typing import Optional, List
 import json
 
 if typing.TYPE_CHECKING:
-    from app.schemas.linkedin_organization import LinkedinOrganization
     from app.schemas.user import User
+
+
+class LinkedinOrganizationContribution(BaseModel):
+    linkedin_id: str
+    role: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 class LinkedinUserBase(BaseModel):
@@ -29,24 +35,20 @@ class LinkedinUserBase(BaseModel):
 
 
 class LinkedinUserCreate(LinkedinUserBase):
-    password: str
-
-
-class LinkedinUserUpdate(BaseModel):
-    name: Optional[str] = None
-    header: Optional[str] = None
-    profile_picture: Optional[str] = None
-    email: Optional[str] = None
-    external_websites: Optional[List[str]] = None
+    email: str
     password: Optional[str] = None
 
 
 class LinkedinUser(LinkedinUserBase):
-    organizations: List['LinkedinOrganization'] = []
+    organizations: List[LinkedinOrganizationContribution] = []
     user: Optional['User'] = None
 
     class Config:
         from_attributes = True
+
+
+class LinkedinUserUpdate(LinkedinUser):
+    password: Optional[str] = None
 
 
 class LinkedinUserInDB(LinkedinUser):
