@@ -151,6 +151,8 @@ class GithubScraper:
 
     def fetch_user_email(self, username: str, repo: str) -> str | None:
         print(f"Searching for commits by {username} in {repo}...")
+        if not repo or repo == "":
+            return None
         commit = self.search_commit(username, repo)
         if not commit:
             return None
