@@ -6,8 +6,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 load_dotenv()
 
+
 class GithubScraper:
-    HEADERS = {}
+    HEADERS: dict = {}
 
     def __init__(self, github_token: str | None = os.environ.get("GITHUB_TOKEN")):
         self.github_token = github_token
@@ -53,15 +54,9 @@ class GithubScraper:
                 user_response = requests.get(user_url, headers=self.HEADERS)
                 if user_response.status_code == 200:
                     user_info = user_response.json()
-                    contribution[contributor['login']]["name"] = user_info.get(
-                       "name", "Name not available"
-                    )
-                    contribution[contributor['login']]["header"] = user_info.get(
-                       "bio", "No bio available"
-                    )
-                    contribution[contributor['login']]["email"] = user_info.get(
-                       "email", "Email not public"
-                    )
+                    contribution[contributor['login']]["name"] = user_info.get("name", "Name not available")
+                    contribution[contributor['login']]["header"] = user_info.get("bio", "No bio available")
+                    contribution[contributor['login']]["email"] = user_info.get("email", "Email not public")
 
                 contributions.append(contribution)
             return contributions
@@ -69,7 +64,7 @@ class GithubScraper:
             print(f"Failed to fetch contributors: {contributors_response.status_code}")
             print(contributors_response.json())
             return None
-        
+
     def search_commits_by_user(self, username: str) -> set:
         """Search commits made by the user across all public repositories."""
         url = f"https://api.github.com/search/commits?q=author:{username}&per_page=100"
@@ -140,6 +135,7 @@ class GithubScraper:
             else:
                 print(f"Failed to fetch commits: {response.status_code}")
                 break
+        return None
 
     def get_email_from_patch(self, commit_url: str) -> str | None:
         """Fetch the patch of a commit and extract the author's email."""

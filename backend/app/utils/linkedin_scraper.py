@@ -3,14 +3,14 @@ from time import sleep
 from typing import List, Dict, Optional, Tuple
 
 from selenium import webdriver
-from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException, NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 
-SITE = 'https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin'
+SITE: str = 'https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin'
+
 
 class LinkedInScraper:
     def __init__(self, username: str | None = None, password: str | None = None):
@@ -30,31 +30,32 @@ class LinkedInScraper:
             log_in_button.click()
             sleep(8)
         else:
-            sleep(15) # allow user to login manually
+            sleep(15)  # allow user to login manually
 
     def get_user_profile_url(self) -> Optional[str]:
         self.driver.get("https://www.linkedin.com/feed/")
         sleep(2)
-        
+
         try:
             return WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 
-                    "div.scaffold-layout__sidebar .artdeco-card.pb4.mb2.overflow-hidden a[href*='/in/']"))
-            ).get_attribute('href')
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR,
+                        "div.scaffold-layout__sidebar .artdeco-card.pb4.mb2.overflow-hidden a[href*='/in/']")
+                    )).get_attribute('href')
         except Exception as e:
             print(f"Could not find the user profile link: {e}")
             return None
 
-    def scrape_user_companies(self, user_profile_url: str) -> Tuple[List[str], List[str]]:
+    def scrape_user_companies(self, user_profile_url: str) -> Tuple[List[dict], List[dict]]:
         experience_links = self._scrape_company_links(f"{user_profile_url}details/experience/")
         education_links = self._scrape_company_links(f"{user_profile_url}details/education/")
         return experience_links, education_links
-    
+
     def scrape_company_people(self, url: str) -> List[Dict]:
         self.driver.get(url if 'people' in url else f"{url}people/")
         sleep(3)
 
-        people = []
+        people: list = []
         last_height = self.driver.execute_script("return document.body.scrollHeight")
 
         while True:
@@ -80,13 +81,13 @@ class LinkedInScraper:
         sleep(2)
 
         return people
-    
+
     def scrape_person_contact_info(self, linkedin_id: str) -> Dict:
         contact_info_url = f"https://www.linkedin.com/in/{linkedin_id}/overlay/contact-info/"
         self.driver.get(contact_info_url)
         sleep(2)
 
-        contact_info = {
+        contact_info: dict = {
             'email': None,
             'github': None,
             'external_websites': []
@@ -146,7 +147,7 @@ class LinkedInScraper:
                 for dt_element in dl_element.find_all('dt'):
                     current_heading = dt_element.find('h3').text.strip().lower()
                     dd_element = dt_element.find_next_sibling('dd')
-                    
+
                     if current_heading == 'website':
                         company_info[current_heading] = dd_element.find('a')['href']
                     elif current_heading == 'company size':
@@ -160,14 +161,14 @@ class LinkedInScraper:
         except Exception as e:
             print(f"Error scraping company info: {e}")
             return {}
-    
+
     def scrape_company_filters(self, company_url: str) -> Dict:
         self.driver.get(f"{company_url}people/")
         sleep(3)
 
-        filters = {}
-        completed_filter_types = set()
-        next_clicks_needed = 0
+        filters: dict = {}
+        completed_filter_types: set = set()
+        next_clicks_needed: int = 0
 
         try:
             try:
@@ -190,15 +191,15 @@ class LinkedInScraper:
 
                 if not (next_button := self.driver.find_element(By.CSS_SELECTOR, "button.artdeco-pagination__button--next")):
                     break
-                if "artdeco-button--disabled" in next_button.get_attribute("class"):
+                if next_button.get_attribute("class") and "artdeco-button--disabled" in next_button.get_attribute("class"):
                     break
                 next_clicks_needed += 1
                 sleep(.5)
-            
+
         except Exception as e:
             print(f"An error occurred: {e}")
         return filters
-    
+
     def logout(self):
         try:
             self.driver.get("https://www.linkedin.com/m/logout/")
@@ -206,7 +207,7 @@ class LinkedInScraper:
             print("Successfully logged out of LinkedIn")
         except Exception as e:
             print(f"Error during logout: {e}")
-    
+
     def _scrape_company_links(self, page_url: str) -> List[Dict]:
         self.driver.get(page_url)
         sleep(3)
@@ -222,8 +223,10 @@ class LinkedInScraper:
                 company_link = section.find_element(By.CSS_SELECTOR, "a.optional-action-target-wrapper")
                 company_info['url'] = company_link.get_attribute('href')
 
-                role_or_degree_element = section.find_element(By.CSS_SELECTOR, "span.t-14.t-normal")
-                company_info['role_or_degree'] = role_or_degree_element.text.strip()
+                if role_or_degree_element := section.find_element(By.CSS_SELECTOR, "span.t-14.t-normal"):
+                    company_info['role_or_degree'] = role_or_degree_element.text.strip()
+                else:
+                    company_info['role_or_degree'] = ''
 
                 if not any(edu_term in company_info['role_or_degree'].lower() for edu_term in ['bachelor', 'master', 'phd', 'certificate', 'diploma']):
                     try:
@@ -246,7 +249,6 @@ class LinkedInScraper:
 
         return company_info_list
 
-
     def _extract_person_info(self, card) -> Optional[Dict]:
         try:
             profile_link = card.find_element(By.CSS_SELECTOR, "a.app-aware-link").get_attribute('href')
@@ -260,7 +262,7 @@ class LinkedInScraper:
             print(f"Error processing a profile card: {e}")
             return None
 
-    def _click_element_with_retry(self, selector: str, by: By = By.CSS_SELECTOR, max_attempts: int = 3) -> bool:
+    def _click_element_with_retry(self, selector: str, by: str = By.CSS_SELECTOR, max_attempts: int = 3) -> bool:
         for _ in range(max_attempts):
             try:
                 element = WebDriverWait(self.driver, 10).until(
@@ -270,12 +272,12 @@ class LinkedInScraper:
                 return True
             except (StaleElementReferenceException, NoSuchElementException) as e:
                 sleep(1)
-        print(f"Failed to click element after {max_attempts} attempts: {e}")
+                print(f"Failed to click element after {max_attempts} attempts: {e}")
         return False
 
     def _click_next(self, clicks_needed: int) -> bool:
         return all(self._click_element_with_retry("button.artdeco-pagination__button--next") for _ in range(clicks_needed))
-    
+
     def _process_company_filters_page(self, filters: Dict, completed_filter_types: set, next_clicks_needed: int) -> None:
         try:
             insights_container = WebDriverWait(self.driver, 10).until(
@@ -283,7 +285,7 @@ class LinkedInScraper:
             )
             html_content = insights_container.get_attribute('outerHTML')
             soup = BeautifulSoup(html_content, 'html.parser')
-        
+
             filter_sections = soup.find_all('div', class_=lambda x: x and x.startswith('artdeco-card p4 m2'))
 
             for section in filter_sections:
@@ -294,7 +296,7 @@ class LinkedInScraper:
                     name = element.find('span', class_='org-people-bar-graph-element__category').text.strip()
 
                     element_xpath = f"//button[contains(@class, 'org-people-bar-graph-element') and .//span[contains(@class, 'org-people-bar-graph-element__category') and text()='{name}']]"
-                
+
                     if self._click_element_with_retry(element_xpath, by=By.XPATH):
                         sleep(.5)
 

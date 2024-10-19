@@ -2,12 +2,14 @@ from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
+
 class GithubUserRepositoryMap(Base):
     __tablename__ = "github_user_repository_map"
 
     github_user_username = Column(String, ForeignKey("github_users.username"), primary_key=True)
     repository_path = Column(String, ForeignKey("repositories.path"), primary_key=True)
     num_contributions = Column(Integer, default=0)
+
 
 class GithubUser(Base):
     __tablename__ = "github_users"

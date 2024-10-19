@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, JSON
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
+
 class LinkedinOrganization(Base):
     __tablename__ = "linkedin_organizations"
 

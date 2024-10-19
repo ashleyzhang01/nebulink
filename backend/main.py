@@ -16,9 +16,11 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 
+
 @app.on_event("startup")
 async def startup_event():
     create_tables()
+
 
 @app.get("/")
 def read_root():

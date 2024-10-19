@@ -1,0 +1,8 @@
+[tool.ruff]
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    ".venv",
+]
+per-file-ignores = { "__init__.py" = ["F401"] }

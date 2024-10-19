@@ -6,6 +6,7 @@ from app.core.config import settings
 engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)  # singlestore connection
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 def get_db():
     db = SessionLocal()
     try:

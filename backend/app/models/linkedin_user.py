@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, ForeignKey, DateTime, ARRAY
+from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.db.database import Base
+
 
 class LinkedinUserOrganizationMap(Base):
     __tablename__ = "linkedin_user_organization_map"
@@ -10,6 +11,7 @@ class LinkedinUserOrganizationMap(Base):
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     role = Column(String, nullable=True)
+
 
 class LinkedinUser(Base):
     __tablename__ = "linkedin_users"

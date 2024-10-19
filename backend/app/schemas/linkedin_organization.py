@@ -2,8 +2,10 @@ import typing
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 
+
 if typing.TYPE_CHECKING:
     from app.schemas.linkedin_user import LinkedinUser
+
 
 class LinkedinOrganizationBase(BaseModel):
     linkedin_id: str
@@ -17,8 +19,10 @@ class LinkedinOrganizationBase(BaseModel):
     logo: Optional[str] = None
     filters: Optional[Dict] = None
 
+
 class LinkedinOrganizationCreate(LinkedinOrganizationBase):
     pass
+
 
 class LinkedinOrganizationUpdate(BaseModel):
     name: Optional[str] = None
@@ -30,6 +34,7 @@ class LinkedinOrganizationUpdate(BaseModel):
     specialties: Optional[str] = None
     logo: Optional[str] = None
     filters: Optional[Dict] = None
+
 
 class LinkedinOrganization(LinkedinOrganizationBase):
     linkedin_users: List['LinkedinUser'] = []
