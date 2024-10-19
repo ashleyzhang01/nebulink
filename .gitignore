@@ -1,0 +1,38 @@
+*/__pycache__
+*venv
+
+
+# dependencies
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+frontend/.yarn/install-state.gz
+
+# testing
+frontend/coverage
+
+# next.js
+frontend/.next/
+frontend/out/
+
+# production
+frontend/build
+
+# misc
+*.DS_Store
+*.pem
+
+# debug
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# local env files
+*/.env*.local
+
+# vercel
+*.vercel
+
+# typescript
+*.tsbuildinfo
+*next-env.d.ts
