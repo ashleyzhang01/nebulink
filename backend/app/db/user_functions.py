@@ -32,3 +32,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 def get_user_by_email(email: str, db: Session) -> User | None:
     return db.query(User).filter(User.email == email).first()
+
+
+def get_user_by_id(user_id: int, db: Session) -> User | None:
+    return db.query(User).filter(User.id == user_id).first()

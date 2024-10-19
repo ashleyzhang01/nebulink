@@ -15,9 +15,9 @@ def get_user_organization_associations(db: Session, username: str = None, organi
     query = db.query(LinkedinUserOrganizationMap)
     
     if username:
-        query = query.filter(LinkedinUserOrganizationMap.linkedin_user_username == username)
+        query = query.filter(LinkedinUserOrganizationMap.linkedin_user_username == username).limit(500)
     if organization_id:
-        query = query.filter(LinkedinUserOrganizationMap.linkedin_organization_id == organization_id)
+        query = query.filter(LinkedinUserOrganizationMap.linkedin_organization_id == organization_id).limit(500)
     
     associations = query.all()
     
