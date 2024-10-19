@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 class User(Base):
@@ -9,4 +10,8 @@ class User(Base):
     password = Column(String)
     header = Column(String, nullable=True)
     summary = Column(String, nullable=True)
-    # TODO: add fk to github user and linkedin user
+    github_user_id = Column(String, ForeignKey("github_users.username"), nullable=True)
+    linkedin_user_id = Column(String, ForeignKey("linkedin_users.username"), nullable=True)
+
+    github_user = relationship("GithubUser", back_populates="user")
+    linkedin_user = relationship("LinkedinUser", back_populates="user")
