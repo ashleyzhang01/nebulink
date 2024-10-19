@@ -1,4 +1,5 @@
-from app.models.github_user import GithubUser
+from typing import List
+from app.models.github_user import GithubUser, GithubUserRepositoryMap
 from app.schemas.github_user import RepositoryContribution
 from sqlalchemy.orm import Session
 from app.schemas import GithubUser as GithubUserSchema, Repository as RepositorySchema
@@ -53,3 +54,8 @@ def update_github_user(github_user: GithubUserSchema, db: Session) -> GithubUser
         user_dict['repositories'] = repositories
         return GithubUserSchema(**user_dict)
     return None
+
+
+def get_github_users_by_repository(repository_path: str, db: Session) -> List[GithubUserSchema]:
+    repo_maps = db.query(GithubUserRepositoryMap).filter(GithubUserRepositoryMap.repository_path == repository_path).all()
+    return [get_github_user_by_username(repo_map.github_user_username, db) for repo_map in repo_maps]

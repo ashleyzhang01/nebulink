@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, github, linkedin
+from app.api.routes import auth, github, linkedin, network
 from app.db.database import create_tables
 from app.core.config import settings
 
@@ -17,6 +17,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(github.router, prefix=settings.API_V1_STR)
 app.include_router(linkedin.router, prefix=settings.API_V1_STR)
+app.include_router(network.router, prefix=settings.API_V1_STR)
 
 
 @app.on_event("startup")

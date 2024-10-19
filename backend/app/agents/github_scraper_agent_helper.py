@@ -45,9 +45,9 @@ def get_github_user_2_degree_network(username: str, token: Optional[str], db: Se
                     )
                     
                     if not db_repository:
-                        db_repository = create_repository(repo_schema, db)
+                        db_repository = create_repository(repo_schema, db_github_user.token, db)
                     elif db_repository.description != repo_info["description"] or db_repository.stars != repo_info["stars"]:
-                        db_repository = update_repository(repo_schema, db)
+                        db_repository = update_repository(repo_schema, db_github_user.token, db)
                     
                     add_user_to_repository(repo_path, db_github_user.username, 0, db)
 
