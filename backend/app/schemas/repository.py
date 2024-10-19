@@ -1,9 +1,10 @@
-import typing
 from pydantic import BaseModel
 from typing import Optional, List
 
-if typing.TYPE_CHECKING:
-    from app.schemas.github_user import GithubUser
+
+class GithubUserContribution(BaseModel):
+    username: str
+    num_contributions: int
 
 
 class RepositoryBase(BaseModel):
@@ -16,13 +17,8 @@ class RepositoryCreate(RepositoryBase):
     pass
 
 
-class RepositoryUpdate(BaseModel):
-    description: Optional[str] = None
-    stars: Optional[int] = None
-
-
 class Repository(RepositoryBase):
-    github_users: List['GithubUser'] = []
+    github_users: List[GithubUserContribution] = []
 
     class Config:
         from_attributes = True

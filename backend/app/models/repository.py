@@ -10,4 +10,4 @@ class Repository(Base):
     description = Column(String, nullable=True)
     stars = Column(Integer, default=0)
 
-    github_users = relationship("GithubUser", secondary="github_user_repository_map", back_populates="repositories")
+    github_users = relationship("GithubUserRepositoryMap", back_populates="repository")

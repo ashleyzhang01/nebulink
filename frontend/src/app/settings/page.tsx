@@ -9,6 +9,7 @@ export default function Settings() {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
+    console.log(token)
     if (!token) {
       router.push('/login')
     } else {

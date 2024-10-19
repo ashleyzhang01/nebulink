@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, DateTime
+from sqlalchemy import Column, String, ForeignKey, DateTime, Integer
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
@@ -24,5 +24,6 @@ class LinkedinUser(Base):
     external_websites = Column(String, nullable=True)  # Store as JSON string
     password = Column(String, nullable=True)
 
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     user = relationship("User", back_populates="linkedin_user", uselist=False)
     organizations = relationship("LinkedinOrganization", secondary="linkedin_user_organization_map", back_populates="linkedin_users")

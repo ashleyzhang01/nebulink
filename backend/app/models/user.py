@@ -11,8 +11,6 @@ class User(Base):
     password = Column(String)
     header = Column(String, nullable=True)
     summary = Column(String, nullable=True)
-    github_user_id = Column(String, ForeignKey("github_users.username"), nullable=True)
-    linkedin_user_id = Column(String, ForeignKey("linkedin_users.username"), nullable=True)
 
-    github_user = relationship("GithubUser", back_populates="user")
-    linkedin_user = relationship("LinkedinUser", back_populates="user")
+    github_user = relationship("GithubUser", back_populates="user", uselist=False)
+    linkedin_user = relationship("LinkedinUser", back_populates="user", uselist=False)
