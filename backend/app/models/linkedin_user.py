@@ -29,4 +29,4 @@ class LinkedinUser(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     user = relationship("User", back_populates="linkedin_user", uselist=False)
-    organizations = relationship("LinkedinOrganization", secondary="linkedin_user_organization_map", back_populates="linkedin_users")
+    organization_maps = relationship("LinkedinUserOrganizationMap", back_populates="linkedin_user")

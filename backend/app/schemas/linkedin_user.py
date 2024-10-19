@@ -41,13 +41,18 @@ class LinkedinUserCreate(LinkedinUserBase):
 
 class LinkedinUser(LinkedinUserBase):
     organizations: List[LinkedinOrganizationContribution] = []
-    user: Optional['User'] = None
+    user_id: Optional[int] = None
 
     class Config:
         from_attributes = True
 
 
-class LinkedinUserUpdate(LinkedinUser):
+class LinkedinUserUpdate(BaseModel):
+    name: Optional[str] = None
+    header: Optional[str] = None
+    profile_picture: Optional[str] = None
+    email: Optional[str] = None
+    external_websites: Optional[List[str]] = None
     password: Optional[str] = None
 
 

@@ -1,3 +1,5 @@
+from typing import Optional
+from app.db.linkedin_user_functions import get_user_organization_associations
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import set_attribute
 from app.models.linkedin_organization import LinkedinOrganization
@@ -8,15 +10,7 @@ from datetime import datetime
 def get_linkedin_organization_by_id(linkedin_id: str, db: Session) -> LinkedinOrganizationSchema | None:
     db_organization = db.query(LinkedinOrganization).filter(LinkedinOrganization.linkedin_id == linkedin_id).first()
     if db_organization:
-        linkedin_users = [
-            LinkedinUserContribution(
-                username=user_org_map.linkedin_user_username,
-                role=user_org_map.role,
-                start_date=user_org_map.start_date.isoformat() if user_org_map.start_date else None,
-                end_date=user_org_map.end_date.isoformat() if user_org_map.end_date else None
-            ) 
-            for user_org_map in db_organization.user_maps
-        ]
+        linkedin_users = [user for _, user in get_user_organization_associations(db, organization_id=linkedin_id)]
         return LinkedinOrganizationSchema(
             linkedin_id=db_organization.linkedin_id,
             name=db_organization.name,
@@ -53,7 +47,7 @@ def update_linkedin_organization(organization: LinkedinOrganizationSchema, db: S
         return get_linkedin_organization_by_id(db_organization.linkedin_id, db)
     return None
 
-def add_user_to_organization(linkedin_id: str, linkedin_username: str, role: str, start_date: str, end_date: str, db: Session) -> LinkedinOrganizationSchema | None:
+def add_user_to_organization(linkedin_id: str, linkedin_username: str, role: Optional[str], start_date: Optional[datetime], end_date: Optional[datetime], db: Session) -> LinkedinOrganizationSchema | None:
     db_organization = db.query(LinkedinOrganization).filter(LinkedinOrganization.linkedin_id == linkedin_id).first()
     if db_organization:
         from app.db.linkedin_user_functions import get_linkedin_user_by_username
@@ -66,15 +60,15 @@ def add_user_to_organization(linkedin_id: str, linkedin_username: str, role: str
 
             if existing_relationship:
                 set_attribute(existing_relationship, 'role', role)
-                set_attribute(existing_relationship, 'start_date', datetime.fromisoformat(start_date) if start_date else None)
-                set_attribute(existing_relationship, 'end_date', datetime.fromisoformat(end_date) if end_date else None)
+                set_attribute(existing_relationship, 'start_date', start_date)
+                set_attribute(existing_relationship, 'end_date', end_date)
             else:
                 new_relationship = LinkedinUserOrganizationMap(
                     linkedin_user_username=linkedin_username,
                     linkedin_organization_id=linkedin_id,
                     role=role,
-                    start_date=datetime.fromisoformat(start_date) if start_date else None,
-                    end_date=datetime.fromisoformat(end_date) if end_date else None
+                    start_date=start_date,
+                    end_date=end_date
                 )
                 db.add(new_relationship)
             

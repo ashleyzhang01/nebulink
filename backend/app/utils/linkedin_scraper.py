@@ -58,7 +58,8 @@ class LinkedInScraper:
         people: list = []
         last_height = self.driver.execute_script("return document.body.scrollHeight")
 
-        while True:
+        while (scrollCount := 0) < 20:
+        # while True:
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(2)
 
@@ -76,7 +77,7 @@ class LinkedInScraper:
             if (new_height := self.driver.execute_script("return document.body.scrollHeight")) == last_height:
                 break
             last_height = new_height
-
+            scrollCount += 1
         self.driver.execute_script("window.scrollTo(0, 0);")
         sleep(2)
 
@@ -193,6 +194,8 @@ class LinkedInScraper:
                     break
                 if next_button.get_attribute("class") and "artdeco-button--disabled" in next_button.get_attribute("class"):
                     break
+                if len(completed_filter_types) == 7:
+                    break
                 next_clicks_needed += 1
                 sleep(.5)
 
@@ -213,7 +216,8 @@ class LinkedInScraper:
         sleep(3)
         company_info_list = []
 
-        main_element = self.driver.find_element(By.CSS_SELECTOR, "main.scaffold-layout__main")
+        if not (main_element := self.driver.find_element(By.CSS_SELECTOR, "main.scaffold-layout__main")):
+            return []
         sections = main_element.find_elements(By.CSS_SELECTOR, "li.artdeco-list__item")
 
         for section in sections:
@@ -304,7 +308,8 @@ class LinkedInScraper:
                             filter_type, filter_id = filter_param.groups()
                             if filter_type not in completed_filter_types:
                                 filters.setdefault(filter_type, {})[filter_id] = {"name": name, "num_people": count}
-
+                            elif len(filters[filter_type]) > 6:
+                                completed_filter_types.add(filter_type)
                         self.driver.execute_script("window.history.go(-1)")
                         sleep(.5)
 

@@ -19,69 +19,76 @@ def get_github_user_2_degree_network(username: str, token: Optional[str], db: Se
         if depth > 2 or username in processed_users:  # Stop at 2nd degree
             return
         
-        user_contributions = github_scraper.fetch_all_contributions(username)
-        db_github_user = get_github_user_by_username(username, db)
-        
-        if not db_github_user:
-            db_github_user = create_github_user(GithubUserSchema(username=username), db)
-        
-        for repo_path in user_contributions[1]:
-            if repo_path in processed_repos:
-                continue
-
-            db_repository = get_repository_by_path(repo_path, db)
-
-            repo_info = github_scraper.get_repo_info(f"https://api.github.com/repos/{repo_path}")
-            if not repo_info:
-                continue
-
-            processed_repos.add(repo_path)
-            repo_schema = RepositorySchema(
-                path=repo_path,
-                description=repo_info["description"],
-                stars=repo_info["stars"]
-            )
+        try:
+            user_contributions = github_scraper.fetch_all_contributions(username)
+            db_github_user = get_github_user_by_username(username, db)
             
-            if not db_repository:
-                db_repository = create_repository(repo_schema, db)
-            elif db_repository.description != repo_info["description"] or db_repository.stars != repo_info["stars"]:
-                db_repository = update_repository(repo_schema, db)
+            if not db_github_user:
+                db_github_user = create_github_user(GithubUserSchema(username=username), db)
             
-            add_user_to_repository(repo_path, db_github_user.username, 0, db)
-
-            contributors_url = f"https://api.github.com/repos/{repo_path}/contributors"
-            contributors = github_scraper.get_contributors(contributors_url)
-
-            for contributor in contributors:
-                contributor_username = list(contributor.keys())[0]
-                contributor_info = contributor[contributor_username]
-                
-                if contributor_username in processed_users:
+            for repo_path in user_contributions[1]:
+                if repo_path in processed_repos:
                     continue
 
-                processed_users.add(contributor_username)
-                db_contributor = get_github_user_by_username(contributor_username, db)
-                contributor_schema = GithubUserSchema(
-                    username=contributor_username,
-                    profile_picture=contributor_info["profile_picture"],
-                    name=contributor_info["name"],
-                    email=contributor_info["email"],
-                    header=contributor_info["header"]
-                )
+                try:
+                    db_repository = get_repository_by_path(repo_path, db)
 
-                if not db_contributor:
-                    db_contributor = create_github_user(contributor_schema, db)
-                elif (db_contributor.profile_picture != contributor_info["profile_picture"] or
-                        db_contributor.name != contributor_info["name"] or
-                        db_contributor.email != contributor_info["email"] or
-                        db_contributor.header != contributor_info["header"]):
-                    update_github_user(contributor_schema, db)
+                    repo_info = github_scraper.get_repo_info(f"https://api.github.com/repos/{repo_path}")
+                    if not repo_info:
+                        continue
 
-                add_user_to_repository(db_repository.path, db_contributor.username, contributor_info["num_contributions"], db)
-                
-                if depth < 1:
-                    process_user_network(contributor_username, depth + 1)
-    
+                    processed_repos.add(repo_path)
+                    repo_schema = RepositorySchema(
+                        path=repo_path,
+                        description=repo_info["description"],
+                        stars=repo_info["stars"]
+                    )
+                    
+                    if not db_repository:
+                        db_repository = create_repository(repo_schema, db)
+                    elif db_repository.description != repo_info["description"] or db_repository.stars != repo_info["stars"]:
+                        db_repository = update_repository(repo_schema, db)
+                    
+                    add_user_to_repository(repo_path, db_github_user.username, 0, db)
+
+                    contributors_url = f"https://api.github.com/repos/{repo_path}/contributors"
+                    contributors = github_scraper.get_contributors(contributors_url)
+
+                    for contributor in contributors:
+                        contributor_username = list(contributor.keys())[0]
+                        contributor_info = contributor[contributor_username]
+                        
+                        if contributor_username in processed_users:
+                            continue
+
+                        processed_users.add(contributor_username)
+                        db_contributor = get_github_user_by_username(contributor_username, db)
+                        contributor_schema = GithubUserSchema(
+                            username=contributor_username,
+                            profile_picture=contributor_info["profile_picture"],
+                            name=contributor_info["name"],
+                            email=contributor_info["email"],
+                            header=contributor_info["header"]
+                        )
+
+                        if not db_contributor:
+                            db_contributor = create_github_user(contributor_schema, db)
+                        elif (db_contributor.profile_picture != contributor_info["profile_picture"] or
+                                db_contributor.name != contributor_info["name"] or
+                                db_contributor.email != contributor_info["email"] or
+                                db_contributor.header != contributor_info["header"]):
+                            update_github_user(contributor_schema, db)
+
+                        add_user_to_repository(db_repository.path, db_contributor.username, contributor_info["num_contributions"], db)
+                        
+                        if depth < 1:
+                            process_user_network(contributor_username, depth + 1)
+
+                except Exception as e:
+                    print(f"Error processing repository {repo_path}: {str(e)}")
+                    continue
+        except Exception as e:
+            print(f"Error processing user network: {e}")
     process_user_network(username)
 
 
