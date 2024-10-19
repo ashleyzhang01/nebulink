@@ -1,8 +1,9 @@
 aiomysql==0.2.0
 annotated-types==0.7.0
 anyio==4.6.2.post1
-bcrypt==3.2.0
+bcrypt==4.2.0
 cffi==1.17.1
+chromadb==0.5.15
 click==8.1.7
 cryptography==43.0.3
 dnspython==2.7.0
