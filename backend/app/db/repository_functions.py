@@ -133,10 +133,10 @@ def get_readme_by_path(path: str) -> str | None:
             if response.status_code == 200:
                 print(f"Success! Found README at {url}")
                 return response.text  # Return the README content
-            else:
-                print(f"Failed to fetch README from {url}: {response.status_code}")
+
         except requests.RequestException as e:
             print(f"Error fetching README from {url}: {e}")
 
     # If no valid README is found, return an empty string
+    print("No valid README found")
     return ""
