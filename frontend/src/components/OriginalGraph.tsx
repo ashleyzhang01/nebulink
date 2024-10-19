@@ -94,8 +94,8 @@ const OriginalGraph = () => {
             <script>
                 // Fetch both the nodes and links JSON data
                 Promise.all([
-                    fetch('/dummy_data/dummy_nodes.json').then(response => response.json()),
-                    fetch('/dummy_data/dummy_links.json').then(response => response.json())
+                fetch('/dummy_data/dummy_nodes.json').then(response => response.json()),
+                fetch('/dummy_data/dummy_links.json').then(response => response.json())
                 ])
                 .then(([nodesData, linksData]) => {
                     // Combine nodes and links into a single graphData object
@@ -312,11 +312,10 @@ const OriginalGraph = () => {
             </script>
         </body>
     </html>
-
     `
     return (
         <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-      );
+    );
 };
 
 export default OriginalGraph;
