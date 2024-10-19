@@ -25,3 +25,38 @@ body {
     text-wrap: balance;
   }
 }
+
+.search-container {
+  position: absolute;
+  top: 20px;
+  /* Padding from the top */
+  left: 20px;
+  /* Padding from the left */
+  width: auto;
+  z-index: 1000;
+  /* Ensures it overlays on top of other components */
+}
+
+.search-box {
+  width: 300px;
+  /* Initial width */
+  min-height: 40px;
+  /* Minimum height */
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: none;
+  /* Prevents manual resizing */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  outline: none;
+}
+
+.search-box:focus {
+  height: 150px;
+  /* Expand height on focus */
+  width: 400px;
+  /* Expand width on focus */
+  border-color: #007bff;
+}
