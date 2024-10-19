@@ -2,10 +2,13 @@ from typing import Optional
 from app.db.linkedin_user_functions import get_user_organization_associations
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import set_attribute
+from app.chromadb import get_chroma_collection
 from app.models.linkedin_organization import LinkedinOrganization
 from app.models.linkedin_user import LinkedinUserOrganizationMap
 from app.schemas.linkedin_organization import LinkedinOrganization as LinkedinOrganizationSchema, LinkedinUserContribution
 from datetime import datetime
+
+from app.utils.enums import ChromaCollections
 
 def get_linkedin_organization_by_id(linkedin_id: str, db: Session) -> LinkedinOrganizationSchema | None:
     db_organization = db.query(LinkedinOrganization).filter(LinkedinOrganization.linkedin_id == linkedin_id).first()
@@ -27,6 +30,23 @@ def get_linkedin_organization_by_id(linkedin_id: str, db: Session) -> LinkedinOr
     return None
 
 def create_linkedin_organization(organization: LinkedinOrganizationSchema, db: Session) -> LinkedinOrganizationSchema:
+    # Create linkedin orgainzation in chroma
+    name_string = f"Organization name: {organization.name}\n" if organization.name else ""
+    description_string = f"Description: {organization.description}\n" if organization.description else ""
+    industry_string = f"Industry: {organization.industry}\n" if organization.industry else ""
+    company_size_string = f"Company size: {organization.company_size}\n" if organization.company_size else ""
+    specialties_string = f"Specialties: {organization.specialties}\n" if organization.specialties else ""
+    linkedin_chroma_string = (
+        name_string + description_string + industry_string + company_size_string + specialties_string
+    )
+    linkedin_chroma_collection = get_chroma_collection(
+        collection=ChromaCollections.LINKEDIN_ORGANIZATION,
+    )
+    linkedin_chroma_collection.upsert(
+        documents=[linkedin_chroma_string],
+        ids=[organization.linkedin_id],
+    )
+    # Create organization in DB
     db_organization = LinkedinOrganization(**organization.dict(exclude={'linkedin_users'}))
     db.add(db_organization)
     db.commit()
