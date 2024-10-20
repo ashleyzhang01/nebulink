@@ -414,14 +414,6 @@ const NetworkGraph: React.FC = () => {
 
       return sprite;
     }
-
-    function showNodeModal(node: Node) {
-      setSelectedNode(node);
-    }
-
-    function closeModal() {
-      setSelectedNode(null);
-    }
   
     function handleCorrespondingNodeClick(nodeId: number) {
       if (graphData && graphInstance.current) {

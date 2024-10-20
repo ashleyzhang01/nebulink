@@ -89,8 +89,6 @@ async def general_search(
         for user in users:
             linkedin_user_results.append(user)
 
-    github_results: list[Repository] = []
-
     print("linkedin: ", linkedin_results)
     print("github: ", github_results)
 
