@@ -14,6 +14,7 @@ class LinkedinOrganizationContribution(BaseModel):
     end_date: Optional[str] = None
 
 
+
 class LinkedinUserBase(BaseModel):
     username: str
     name: Optional[str] = None

@@ -52,7 +52,7 @@ export default function SearchBox() {
                         style={{
                             flex: 1,
                             padding: '10px',
-                            paddingRight: '40px', // Make room for the search icon
+                            paddingRight: '40px',
                             margin: 0,
                             fontSize: '16px',
                             border: 'none',
@@ -76,7 +76,8 @@ export default function SearchBox() {
 
             {error && <p style={{ color: "red", marginTop: '10px' }}>{error}</p>}
 
-            {results && (results.linkedin_results?.length > 0 || results.github_results?.length > 0) && (
+            {/* Display companies if search_type is "company" */}
+            {results && (results.search_type === "company") && (results.linkedin_results?.length > 0) && (
                 <div style={{ 
                     maxHeight: '500px', 
                     overflowY: 'auto', 
@@ -85,51 +86,82 @@ export default function SearchBox() {
                     padding: '15px',
                     marginTop: '10px',
                     width: '500px',
+                    color: 'black'
                 }}>
-                    <h3 style={{ color: '#333' }}>Search Results</h3>
-                    {/* LinkedIn Organizations */}
-                    {results.linkedin_results?.length > 0 && (
+                    <h3 style={{ color: 'black' }}>Company Results</h3>
+                    {results.linkedin_results.map((company: any, index) => (
+                        <div key={index} style={{ 
+                            margin: '10px 0', 
+                            padding: '10px', 
+                            borderRadius: '5px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                            color: 'black'
+                        }}>
+                            <h4 style={{ color: 'black' }}>{company.name}</h4>
+                            {company.logo && (
+                                <img src={company.logo} alt="Logo" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
+                            )}
+                            <p style={{ color: 'black' }}><strong>Description:</strong> {company.description}</p>
+                            <p style={{ color: 'black' }}><strong>Website:</strong> <a href={company.website} target="_blank" rel="noopener noreferrer" style={{ color: 'black' }}>{company.website}</a></p>
+                            <p style={{ color: 'black' }}><strong>Company Size:</strong> {company.company_size}</p>
+                            <p style={{ color: 'black' }}><strong>Headquarters:</strong> {company.headquarters}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Display individuals if search_type is "individual" */}
+            {results && (results.search_type === "individual") && (
+                <div style={{ 
+                    maxHeight: '500px', 
+                    overflowY: 'auto', 
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '10px',
+                    padding: '15px',
+                    marginTop: '10px',
+                    width: '500px',
+                    color: 'black'
+                }}>
+                    <h3 style={{ color: 'black' }}>Individual Results</h3>
+                    {results.linkedin_user_results?.length > 0 && (
                         <div>
-                            <h4 style={{ color: '#0077B5' }}>LinkedIn Organizations:</h4>
-                            {results.linkedin_results.map((org: any, index) => (
+                            <h4 style={{ color: '#0077B5' }}>LinkedIn Users:</h4>
+                            {results.linkedin_user_results.map((user: any, index) => (
                                 <div key={index} style={{ 
                                     margin: '10px 0', 
                                     padding: '10px', 
                                     borderRadius: '5px',
-                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                    color: 'black'
                                 }}>
-                                    <h5>{org.name || `Organization ${index + 1}`}</h5>
-                                    {org.logo && (
-                                        <img src={org.logo} alt="Logo" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
-                                    )}
-                                    {Object.entries(org).map(([key, value]: [string, any]) => {
-                                        if (key !== 'linkedin_users' && value && typeof value === 'string') {
-                                            return <p key={key}><strong>{key}:</strong> {value.length > 50 ? `${value.substring(0, 50)}...` : value}</p>
-                                        }
-                                        return null;
-                                    })}
+                                    <h5 style={{ color: 'black' }}>{user.name}</h5>
+                                    <p style={{ color: 'black' }}><strong>Header:</strong> {user.header}</p>
+                                    <img src={user.profile_picture} alt="Profile" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
                                 </div>
                             ))}
                         </div>
                     )}
-                    {/* GitHub Repositories */}
+
                     {results.github_results?.length > 0 && (
                         <div>
-                            <h4 style={{ color: '#24292e' }}>GitHub Repositories:</h4>
+                            <h4 style={{ color: '#24292e' }}>GitHub Users:</h4>
                             {results.github_results.map((repo: any, index) => (
                                 <div key={index} style={{ 
                                     margin: '10px 0', 
                                     padding: '10px', 
                                     borderRadius: '5px',
-                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                    color: 'black'
                                 }}>
-                                    <h5>{repo.name || `Repository ${index + 1}`}</h5>
-                                    {Object.entries(repo).map(([key, value]: [string, any]) => {
-                                        if (key !== 'github_users' && value && typeof value === 'string') {
-                                            return <p key={key}><strong>{key}:</strong> {value.length > 50 ? `${value.substring(0, 50)}...` : value}</p>
-                                        }
-                                        return null;
-                                    })}
+                                    <h5 style={{ color: 'black' }}>{repo.path}</h5>
+                                    {repo.github_users && repo.github_users.map((user: any, userIndex: number) => (
+                                        <div key={userIndex} style={{ marginTop: '10px' }}>
+                                            <img src={user.profile_picture} alt="Profile" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                                            <p style={{ color: 'black' }}><strong>Username:</strong> {user.username}</p>
+                                            <p style={{ color: 'black' }}><strong>Name:</strong> {user.name}</p>
+                                            <p style={{ color: 'black' }}><strong>Header:</strong> {user.header}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             ))}
                         </div>
