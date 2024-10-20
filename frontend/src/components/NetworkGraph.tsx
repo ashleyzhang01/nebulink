@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import * as THREE from 'three';
 import ForceGraph3D, { ForceGraph3DInstance } from '3d-force-graph';
 import axios from 'axios';
@@ -74,14 +73,23 @@ const NetworkGraph: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const graphInstance = useRef<ForceGraph3DInstance | null>(null);
-  const [activatedGroupId, setActivatedGroupId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [connectedNodes, setConnectedNodes] = useState<{ [groupId: string]: Node[] }>({});
+  const panelRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as any)) {
+        setIsPanelOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchNetwork() {
@@ -159,9 +167,10 @@ const NetworkGraph: React.FC = () => {
 
       const Graph = ForceGraph3D()(graphRef.current)
         .graphData(graphData)
-        .backgroundColor('#04041c')
+        .backgroundColor('#02020f')
         .nodeAutoColorBy('group_id')
-        .linkWidth(3)
+        .linkWidth(0.15)
+        .linkOpacity(0.12)
         .nodeThreeObject((node) => {
           const typedNode = node as Node;
           if (typedNode.expanded) {
@@ -224,24 +233,7 @@ const NetworkGraph: React.FC = () => {
           const typedNode = node as Node;
           setSelectedNode(typedNode);
           setIsPanelOpen(true);
-          updateConnectedNodes(typedNode);
-
-          if (graphInstance.current && containerRef.current) {
-            const vector = new THREE.Vector3(typedNode.x, typedNode.y, typedNode.z);
-            const canvas = graphInstance.current.renderer().domElement;
-            vector.project(graphInstance.current.camera());
-            
-            const widthHalf = canvas.clientWidth / 2;
-            const heightHalf = canvas.clientHeight / 2;
-            
-            const screenPosition = {
-              x: (vector.x * widthHalf) + widthHalf + containerRef.current.offsetLeft,
-              y: -(vector.y * heightHalf) + heightHalf + containerRef.current.offsetTop
-            };
-            
-            setPanelPosition(screenPosition);
-          }
-
+          
           graphData.nodes.forEach(n => {
             const nodeObject = getNodeObjectById(n.id);
             if (nodeObject && nodeObject.__glowSphere) {
@@ -468,7 +460,6 @@ const NetworkGraph: React.FC = () => {
           }
         }
       });
-      setConnectedNodes(connected);
     };
 
     const handleConnectedNodeClick = (nodeId: number) => {
@@ -498,95 +489,147 @@ const NetworkGraph: React.FC = () => {
       <div style={{ position: 'relative', width: '100vw', height: '90vh' }}>
         <div ref={graphRef} style={{ width: '100vw', height: '90vh' }} />
         {isPanelOpen && selectedNode && (
-          <div style={{
+          <div ref={panelRef} style={{
             ...panelStyles,
             position: 'absolute',
             right: '20px',
             top: '20px',
           }}>
-            <div style={caretStyles}></div>
-          <button onClick={() => setIsPanelOpen(false)} style={closeButtonStyles}>Close</button>
-          <h2>{selectedNode.individual_name}</h2>
-          <p><strong>Username:</strong> {selectedNode.username}</p>
-          <p><strong>Email:</strong> {selectedNode.email}</p>
-          <p><strong>Header:</strong> {selectedNode.header}</p>
-          <p><strong>Connection Order:</strong> {selectedNode.connection_order}</p>
-          <p><strong>Group:</strong> {graphData?.groups.find(g => g.id === selectedNode.group_id)?.name}</p>
-          <a href={selectedNode.link} target="_blank" rel="noopener noreferrer" style={linkStyles}>
-            Visit Profile
-          </a>
-          <h3>Connected Nodes:</h3>
-          {Object.entries(connectedNodes).map(([groupId, nodes]) => (
-            <div key={groupId}>
-              <h4>{graphData?.groups.find(g => g.id === groupId)?.name}</h4>
-              {nodes.map(node => (
-                <button
-                  key={node.id}
-                  onClick={() => handleConnectedNodeClick(node.id)}
-                  style={correspondingNodeButtonStyles}
-                >
-                  {node.individual_name || node.username}
-                </button>
-              ))}
+          <button onClick={() => setIsPanelOpen(false)} style={closeButtonStyles}>x</button>
+          <div style={panelContentStyles}>
+            {selectedNode.profile_picture && (
+              <img 
+                src={selectedNode.profile_picture} 
+                alt={selectedNode.individual_name || selectedNode.username}
+                style={profilePictureStyles}
+              />
+            )}
+            <div>
+            <h2>{selectedNode.individual_name || selectedNode.username}</h2>
+              {selectedNode.username && selectedNode.username !== selectedNode.individual_name && (
+                <p><strong>Username:</strong> {selectedNode.username}</p>
+              )}
+              {selectedNode.email && (
+                <p><strong>Email:</strong> {selectedNode.email}</p>
+              )}
+              {selectedNode.header && (
+                <p><strong>Header:</strong> {selectedNode.header}</p>
+              )}
+              {selectedNode.connection_order !== undefined && (
+                <p><strong>Degree of Connection:</strong> {selectedNode.connection_order}</p>
+              )}
+              {selectedNode.group_id && (
+                <p><strong>Group:</strong> {graphData?.groups.find(g => g.id === selectedNode.group_id)?.name}</p>
+              )}
+              {selectedNode.link && (
+                <a href={selectedNode.link} target="_blank" rel="noopener noreferrer" style={linkStyles}>
+                  Visit Profile
+                </a>
+              )}
             </div>
-          ))}
+          </div>
+          {selectedNode.corresponding_user_nodes.length > 0 && (
+            <>
+              <h3 style={{ fontSize: '16px', marginBottom: '10px' }}>Corresponding Nodes:</h3>
+              <div style={correspondingNodesContainerStyles}>
+              {selectedNode.corresponding_user_nodes.map(nodeId => {
+                const correspondingNode = graphData.nodes.find(n => n.id === nodeId);
+                if (correspondingNode) {
+                  return (
+                    <button
+                      key={nodeId}
+                      onClick={() => handleCorrespondingNodeClick(nodeId)}
+                      style={correspondingNodeButtonStyles}
+                    >
+                      {correspondingNode.profile_picture && (
+                        <img 
+                          src={correspondingNode.profile_picture} 
+                          alt={correspondingNode.individual_name || correspondingNode.username}
+                          style={correspondingNodePictureStyles}
+                        />
+                      )}
+                      <span style={correspondingNodeTextStyles}>
+                      {correspondingNode.group_id && (
+                        <span style={groupNameStyles}>
+                          {graphData.groups.find(g => g.id === correspondingNode.group_id)?.name || 'Unknown Group'}
+                        </span>
+                      )}
+                      </span>
+                    </button>
+                  );
+                }
+                return null;
+              })}
+              </div>
+            </>
+          )}
           </div>
         )}
       </div>
     );  
 };
 
-const modalStyles: React.CSSProperties = {
-  display: 'block',
-  position: 'fixed',
-  top: '10%',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  width: '60%',
-  backgroundColor: 'rgba(50, 50, 50, 0.8)', // Translucent gray background
-  borderRadius: '15px',
-  color: '#fff',
-  padding: '20px',
-  boxSizing: 'border-box',
-  zIndex: 1000,
-  overflow: 'auto', // Allow scrolling if content overflows
-  fontFamily: "'Helvetica Neue', Arial, sans-serif",
-  textAlign: 'left',
-};
-
-const modalContentStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'flex-start',
-};
-
-const profilePictureModalStyles: React.CSSProperties = {
-  width: '100px',
-  height: '100px',
-  borderRadius: '50%',
-  marginRight: '20px',
-};
-
 const panelStyles: React.CSSProperties = {
-  width: '300px',
-  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  width: '500px',
+  backgroundColor: 'rgba(0, 0, 0, 0.6)', // More transparent background
   color: 'white',
   padding: '15px',
   borderRadius: '8px',
   overflowY: 'auto',
-  maxHeight: 'calc(100vh - 40px)',
+  maxHeight: '500px',
+  marginTop: '70px',
   zIndex: 10,
   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 };
+
+const panelContentStyles: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  marginBottom: '15px',
+  paddingBottom: '15px',
+};
+
+const correspondingNodeTextStyles: React.CSSProperties = {
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
+
+const groupNameStyles: React.CSSProperties = {
+  fontSize: '10px',
+  color: '#aaa',
+  fontStyle: 'italic',
+};
+
+
+const profilePictureStyles: React.CSSProperties = {
+  width: '60px',
+  height: '60px',
+  borderRadius: '50%',
+  marginRight: '15px',
+  objectFit: 'cover',
+};
+
 
 const correspondingNodeButtonStyles: React.CSSProperties = {
   background: 'transparent',
   border: '1px solid white',
   color: '#fff',
   padding: '5px 10px',
-  margin: '5px',
   cursor: 'pointer',
   borderRadius: '5px',
+  display: 'flex',
+  alignItems: 'center',
+  fontSize: '12px',
 };
+
+const correspondingNodesContainerStyles: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '10px', 
+  maxWidth: '100%', 
+};
+
 
 const caretStyles: React.CSSProperties = {
   position: 'absolute',
@@ -603,6 +646,14 @@ const caretStyles: React.CSSProperties = {
 const linkStyles: React.CSSProperties = {
   color: '#4a90e2',
   textDecoration: 'none',
+};
+
+const correspondingNodePictureStyles: React.CSSProperties = {
+  width: '20px',
+  height: '20px',
+  borderRadius: '50%',
+  marginRight: '5px',
+  objectFit: 'cover',
 };
 
 

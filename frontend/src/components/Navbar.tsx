@@ -21,28 +21,28 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-800 p-4">
+    <nav className="bg-black bg-opacity-80 p-4 fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-white font-bold">
-          Your App
+          nebulink
         </Link>
-        <div>
+        <div className="flex items-center">
           {isLoggedIn ? (
             <>
               <Link href="/settings" className="text-white mr-4">
-                Settings
+                connect
               </Link>
               <button onClick={handleLogout} className="text-white">
-                Logout
+                logout
               </button>
             </>
           ) : (
             <>
               <Link href="/login" className="text-white mr-4">
-                Login
+                login
               </Link>
               <Link href="/signup" className="text-white">
-                Sign Up
+                sign up
               </Link>
             </>
           )}
