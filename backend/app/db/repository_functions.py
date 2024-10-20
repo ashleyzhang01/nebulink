@@ -66,14 +66,17 @@ def get_all_repositories(db: Session) -> List[RepositorySchema]:
 
 def create_repository(repository: RepositorySchema, token: str | None, db: Session) -> RepositorySchema:
     # Create repository in chroma DB with path as the ID
-    readme_string = get_readme_by_path(path=repository.path, token=token)
-    github_collection = get_chroma_collection(
-        collection=ChromaCollections.GITHUB_REPOSITORY,
-    )
-    github_collection.upsert(
-        documents=[readme_string],
-        ids=[repository.path],
-    )
+    try:
+        readme_string = get_readme_by_path(path=repository.path, token=token)
+        github_collection = get_chroma_collection(
+            collection=ChromaCollections.GITHUB_REPOSITORY,
+        )
+        github_collection.upsert(
+            documents=[readme_string],
+            ids=[repository.path],
+        )
+    except Exception as e:
+        print(f"Error creating repository in chroma: {e}")
     # Create repository in primary DB
     db_repository = RepositoryModel(
         path=repository.path,

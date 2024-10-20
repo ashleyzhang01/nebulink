@@ -85,12 +85,11 @@ async def get_user_network(user_id: int, db: Session) -> Dict[str, List]:
                     })
 
         for node in user_nodes:
-            node["corresponding_user_nodes"] = [
-                other_node["id"] for other_node in nodes
+            node["corresponding_user_nodes"] = list(set([
+                other_node["id"] for other_node in nodes + user_nodes
                 if other_node["username"] == node["username"] and
-                other_node["is_linkedin"] == node["is_linkedin"] and
-                other_node["group_id"] != node["group_id"]
-            ]
+                (other_node["is_linkedin"] != node["is_linkedin"] or other_node["group_id"] != node["group_id"])
+            ]))
 
         # Check for corresponding GitHub user
         github_user = get_associated_github_user(linkedin_user.user_id, db)
@@ -99,9 +98,12 @@ async def get_user_network(user_id: int, db: Session) -> Dict[str, List]:
             if github_nodes:
                 for linkedin_node in user_nodes:
                     for github_node in github_nodes:
-                        linkedin_node["corresponding_user_nodes"].append(github_node["id"])
-                        github_node["corresponding_user_nodes"].append(linkedin_node["id"])
+                        if github_node["id"] not in linkedin_node["corresponding_user_nodes"]:
+                            linkedin_node["corresponding_user_nodes"].append(github_node["id"])
+                        if linkedin_node["id"] not in github_node["corresponding_user_nodes"]:
+                            github_node["corresponding_user_nodes"].append(linkedin_node["id"])
 
+        nodes.extend(user_nodes)
         return user_nodes
 
     def process_github_user(github_user, connection_order=0):
@@ -126,12 +128,11 @@ async def get_user_network(user_id: int, db: Session) -> Dict[str, List]:
                 })
 
         for node in user_nodes:
-            node["corresponding_user_nodes"] = [
-                other_node["id"] for other_node in nodes
+            node["corresponding_user_nodes"] = list(set([
+                other_node["id"] for other_node in nodes + user_nodes
                 if other_node["username"] == node["username"] and
-                other_node["is_linkedin"] == node["is_linkedin"] and
-                other_node["group_id"] != node["group_id"]
-            ]
+                (other_node["is_linkedin"] != node["is_linkedin"] or other_node["group_id"] != node["group_id"])
+            ]))
 
         linkedin_user = get_associated_linkedin_user(github_user.user_id, db)
         if linkedin_user:
@@ -139,9 +140,12 @@ async def get_user_network(user_id: int, db: Session) -> Dict[str, List]:
             if linkedin_nodes:
                 for github_node in user_nodes:
                     for linkedin_node in linkedin_nodes:
-                        github_node["corresponding_user_nodes"].append(linkedin_node["id"])
-                        linkedin_node["corresponding_user_nodes"].append(github_node["id"])
+                        if github_node["id"] not in linkedin_node["corresponding_user_nodes"]:
+                            linkedin_node["corresponding_user_nodes"].append(github_node["id"])
+                        if linkedin_node["id"] not in github_node["corresponding_user_nodes"]:
+                            github_node["corresponding_user_nodes"].append(linkedin_node["id"])
 
+        nodes.extend(user_nodes)
         return user_nodes
 
     # Process the main user and their direct associations
@@ -241,7 +245,7 @@ async def get_public_network(db: Session) -> Dict[str, List]:
                     process_github_repository(other_repo.path)
 
     # Start processing from all LinkedIn organizations
-    linkedin_organizations = db.query(LinkedinOrganization).offset(0).limit(200).all()
+    linkedin_organizations = db.query(LinkedinOrganization).offset(0).limit(300).all()
     
     if not linkedin_organizations:
         raise HTTPException(status_code=404, detail="No LinkedIn organizations found")

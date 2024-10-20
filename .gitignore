@@ -37,3 +37,6 @@ frontend/yarn-error.log*
 *.tsbuildinfo
 *next-env.d.ts
 *.env
+
+*/persistent_chroma_client/
+/backend/persistent_chroma_client
