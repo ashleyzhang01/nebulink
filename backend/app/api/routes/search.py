@@ -79,8 +79,6 @@ async def general_search(
             )
         )
 
-    github_results: list[Repository] = []
-
     print("linkedin: ", linkedin_results)
     print("github: ", github_results)
 
