@@ -1,3 +1,4 @@
+from typing import Optional
 from app.chromadb import get_chroma_collection
 from app.chromadb.dataclass import ChromaResult
 from app.utils.enums import ChromaCollections
@@ -33,14 +34,14 @@ def query_from_chroma(
     query: str,
     collection: ChromaCollections,
     n_results: int,
-    str_search: str = "",
 ) -> list[ChromaResult]:
     chroma_collection = get_chroma_collection(collection=collection)
+
     chroma_result = chroma_collection.query(
         query_texts=query,
         n_results=n_results,
-        where_document={"$contains": str_search}
     )
+    
     return _convert_chroma_result_to_dataclass(chroma_result=chroma_result)
 
 

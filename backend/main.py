@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth, github, linkedin, network
 from app.db.database import create_tables
 from app.core.config import settings
+from app.api.routes.search import router as search_router
 
 app = FastAPI()
 
@@ -18,7 +19,7 @@ app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(github.router, prefix=settings.API_V1_STR)
 app.include_router(linkedin.router, prefix=settings.API_V1_STR)
 app.include_router(network.router, prefix=settings.API_V1_STR)
-
+app.include_router(search_router)
 
 @app.on_event("startup")
 async def startup_event():

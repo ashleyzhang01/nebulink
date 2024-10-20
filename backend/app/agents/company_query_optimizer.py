@@ -101,4 +101,5 @@ def handle_company_query_func(query: str):
     } 
 
     response = requests.post(url, headers=headers, json=data)
+    print(response)
     return response.json()['choices'][0]['message']['content']

@@ -1,5 +1,3 @@
-from company_query_optimizer import company_query_optimizer_agent
-from other_query_optimizer import other_query_optimizer_agent
 from uagents import Agent, Context, Model
 import requests
 import os
@@ -81,16 +79,6 @@ async def classify_query(ctx: Context, sender: str, msg: Message):
     classification = response.json()['choices'][0]['message']['content']
     ctx.logger.info(f"Classification result: {classification}")
 
-    if classification == "company":
-        await ctx.send(
-            company_query_optimizer_agent.address,
-            Message(query=query, return_address=return_address, message_id=message_id)
-        )
-    else:
-        await ctx.send(
-            other_query_optimizer_agent.address,
-            Message(query=query, return_address=return_address, message_id=message_id)
-        )
 
 
 def classify_query_func(query: str):
