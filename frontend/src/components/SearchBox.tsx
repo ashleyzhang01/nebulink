@@ -48,7 +48,7 @@ export default function SearchBox() {
                         value={searchText}
                         onChange={handleChange}
                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        placeholder="What are you looking to bring to your network?"
+                        placeholder="Discover knowledge, skills, or contacts—what do you need?"
                         style={{
                             flex: 1,
                             padding: '10px',
