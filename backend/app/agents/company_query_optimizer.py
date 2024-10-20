@@ -1,4 +1,4 @@
-from uagents import Agent, Bureau, Context, Model
+from uagents import Agent, Context, Model
 import requests
 import os
 

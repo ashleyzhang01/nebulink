@@ -5,7 +5,7 @@ from sqlalchemy.orm.attributes import set_attribute
 from app.chromadb import get_chroma_collection
 from app.models.linkedin_organization import LinkedinOrganization
 from app.models.linkedin_user import LinkedinUserOrganizationMap
-from app.schemas.linkedin_organization import LinkedinOrganization as LinkedinOrganizationSchema, LinkedinUserContribution
+from app.schemas.linkedin_organization import LinkedinOrganization as LinkedinOrganizationSchema
 from datetime import datetime
 
 from app.utils.enums import ChromaCollections

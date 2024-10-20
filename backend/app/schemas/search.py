@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional, List
 
 from app.schemas.linkedin_organization import LinkedinOrganization
 from app.schemas.repository import Repository

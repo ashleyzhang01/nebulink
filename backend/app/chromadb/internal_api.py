@@ -1,8 +1,6 @@
-from typing import Any
 from app.chromadb import get_chroma_collection
 from app.chromadb.dataclass import ChromaResult
 from app.utils.enums import ChromaCollections
-import chromadb as cdb
 
 
 def _convert_chroma_result_to_dataclass(

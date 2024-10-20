@@ -4,23 +4,16 @@ from fastapi import APIRouter
 from app.agents.classifier import classify_query_func
 from app.agents.company_query_optimizer import handle_company_query_func
 from app.agents.other_query_optimizer import handle_other_query_func
-from app.chromadb import get_chroma_collection
 from app.chromadb.dataclass import ChromaResult
 from app.chromadb.internal_api import query_from_chroma
 from app.db.linkedin_organization_functions import get_linkedin_organization_by_id
-from app.db.linkedin_user_functions import get_users_by_organization
 from app.models.linkedin_organization import LinkedinOrganization
 from app.models.repository import Repository
-from app.schemas.linkedin_organization import LinkedinOrganization as LinkedinOrganizationSchema
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models import User
-from typing import Dict, List
 from app.schemas.search import GeneralQuerySchema, LinkedinQuerySchema
 from app.utils.enums import ChromaCollections
-from app.utils.github_scraper import GithubScraper
-from backend.app.db.github_user_functions import get_github_users_by_repository
 from backend.app.db.repository_functions import get_repository_by_path
 
 
