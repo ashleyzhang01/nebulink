@@ -7,7 +7,7 @@ from app.db.linkedin_organization_functions import add_user_to_organization, get
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-def get_linkedin_user_2_degree_network(email: str, password: str, db: Session):
+def get_linkedin_user_2_degree_network(email: str, username: str, password: str, db: Session):
     linkedin_scraper = LinkedInScraper(email, password)
     linkedin_scraper.login()
     processed_users: Set[str] = set()
@@ -116,12 +116,9 @@ def get_linkedin_user_2_degree_network(email: str, password: str, db: Session):
         except Exception as e:
             print(f"Error processing user network: {e}")
         
-    user_profile_url = linkedin_scraper.get_user_profile_url()
-    if user_profile_url:
-        initial_username = user_profile_url.split('/in/')[-1].strip('/')
-        process_user_network(initial_username)
-    else:
-        print("Could not find user profile URL")
+    # user_profile_url = linkedin_scraper.get_user_profile_url()
+    # if user_profile_url:
+    process_user_network(username)
 
     linkedin_scraper.logout()
 

@@ -64,7 +64,7 @@ async def create_linkedin_user(
         decrypted_password = None
         if new_linkedin_user.password:
             decrypted_password = fernet.decrypt(new_linkedin_user.password).decode()
-        get_linkedin_user_2_degree_network(new_linkedin_user.email, decrypted_password, db)
+        get_linkedin_user_2_degree_network(new_linkedin_user.email, new_linkedin_user.username, decrypted_password, db)
         # req = LinkedinRequest(
         #     username=new_linkedin_user.username,
         #     password=new_linkedin_user.password,
@@ -95,7 +95,7 @@ async def sync_linkedin_user(
         if existing_linkedin_user.password:
             fernet = get_fernet()
             decrypted_password = fernet.decrypt(existing_linkedin_user.password).decode()
-        get_linkedin_user_2_degree_network(existing_linkedin_user.email, decrypted_password, db)
+        get_linkedin_user_2_degree_network(existing_linkedin_user.email, existing_linkedin_user.username, decrypted_password, db)
         # req = LinkedinRequest(
         #     email=existing_linkedin_user.email,
         #     password=existing_linkedin_user.password,

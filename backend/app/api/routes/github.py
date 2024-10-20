@@ -29,6 +29,7 @@ async def create_github_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    print("entered")
     # Check if the GitHub user already exists for the current user
     existing_github_user = db.query(GithubUser).filter(
         GithubUser.username == github_user.username,
@@ -99,7 +100,7 @@ async def sync_github_user(
 
 
 @router.put("/update", response_model=GithubUserSchema)
-async def update_github_user(
+async def update_github_user_info(
     github_user_update: GithubUserCreate,
     db: Session = Depends(get_db)
 ):

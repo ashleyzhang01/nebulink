@@ -26,28 +26,34 @@ async def general_search(
     db: Session = Depends(get_db)
 ):
     print("entered general search func")
+
+    print(get_chroma_collection(ChromaCollections.LINKEDIN_ORGANIZATION).count())
+    print(get_chroma_collection(ChromaCollections.GITHUB_REPOSITORY).count())
     
     classification = classify_query_func(query=query)
     github_results: list[Repository] = []
     print(classification)
 
-    if classification == "other":
+    #if we're just searching over individual, search over github and linkedin companies
+    if classification == "individual":
         optimized_query = handle_other_query_func(query=query)
         print("Optimized query: ", optimized_query)
 
-        github_chroma_results: list[ChromaResult] = query_from_chroma(
-            query=optimized_query,
-            collection=ChromaCollections.GITHUB_REPOSITORY,
-            n_results=5,
+        github_chroma_results = get_chroma_collection(ChromaCollections.GITHUB_REPOSITORY).query(
+            query_texts = optimized_query,
+            n_results = 5
         )
+
         print(github_chroma_results)
-        for github_chroma_result in github_chroma_results:
+
+        for github_chroma_result_id in github_chroma_results.get('ids')[0]:
             github_results.append(
                 get_repository_by_path(
-                    path=github_chroma_result.id,
+                    path=github_chroma_result_id,
                     db=db,
                 )
             )
+    #if we're searching over companies, search over linkedin companies
         
     optimized_query = handle_company_query_func(query=query)
 
@@ -64,17 +70,45 @@ async def general_search(
     print(chroma_results)
 
     linkedin_results: list[LinkedinOrganization] = []
-    # for chroma_result in chroma_results:
-    #     linkedin_results.append(
-    #         get_linkedin_organization_by_id(
-    #             linkedin_id=chroma_result.id,
-    #             db=db,
-    #         )
-    #     )
-    # print(linkedin_results)
+
+    for chroma_result_id in chroma_results.get('ids')[0]:
+        linkedin_results.append(
+            get_linkedin_organization_by_id(
+                linkedin_id=chroma_result_id,
+                db=db,
+            )
+        )
+
     github_results: list[Repository] = []
 
-    return GeneralQuerySchema(linkedin_results=linkedin_results, github_results=github_results)
+    print("linkedin: ", linkedin_results)
+    print("github: ", github_results)
+
+    return GeneralQuerySchema(search_type=classification, linkedin_results=linkedin_results, github_results=github_results)
+
+"""
+resulting:
+search_type = "individual" or "company"
+linkedin_results = LinkedinOrganizationSchema(
+            linkedin_id=db_organization.linkedin_id,
+            name=db_organization.name,
+            description=db_organization.description,
+            website=db_organization.website,
+            industry=db_organization.industry,
+            company_size=db_organization.company_size,
+            headquarters=db_organization.headquarters,
+            specialties=db_organization.specialties,
+            logo=db_organization.logo,
+            filters=db_organization.filters,
+            linkedin_users=linkedin_users
+        )
+github_results = RepositorySchema(
+            path=db_repository.path,
+            description=db_repository.description,
+            stars=db_repository.stars,
+            github_users=github_users
+        )
+"""
 
 @router.get("/search_company", response_model=LinkedinQuerySchema)
 async def linkedin_search(
