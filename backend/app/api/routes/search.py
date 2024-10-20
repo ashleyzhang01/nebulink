@@ -68,9 +68,6 @@ async def general_search(
         )
 
     return GeneralQuerySchema(linkedin_results=linkedin_results, github_results=github_results)
-    
-
-
 
 @router.get("/search_company", response_model=LinkedinQuerySchema)
 async def linkedin_search(
