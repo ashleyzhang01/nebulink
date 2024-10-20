@@ -34,16 +34,7 @@ export default function Home() {
           <NetworkGraph />
         </div>
       ) : (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100%',
-          fontSize: '1.5rem',
-          color: '#333'
-        }}>
-          Please log in to view the network graph.
-        </div>
+        <PublicNetworkGraph />
       )}
     </div>
   );

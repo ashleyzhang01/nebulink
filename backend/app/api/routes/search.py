@@ -39,7 +39,7 @@ async def general_search(
             collection=ChromaCollections.GITHUB_REPOSITORY,
             n_results=5,
         )
-
+        print(github_chroma_results)
         for github_chroma_result in github_chroma_results:
             github_results.append(
                 get_repository_by_path(
@@ -57,15 +57,17 @@ async def general_search(
         n_results = 5
     )
 
+    print(chroma_results)
+
     linkedin_results: list[LinkedinOrganization] = []
-    for chroma_result in chroma_results:
-        linkedin_results.append(
-            get_linkedin_organization_by_id(
-                linkedin_id=chroma_result.id,
-                db=db,
-            )
-        )
-    print(linkedin_results)
+    # for chroma_result in chroma_results:
+    #     linkedin_results.append(
+    #         get_linkedin_organization_by_id(
+    #             linkedin_id=chroma_result.id,
+    #             db=db,
+    #         )
+    #     )
+    # print(linkedin_results)
     github_results: list[Repository] = []
 
     return GeneralQuerySchema(linkedin_results=linkedin_results, github_results=github_results)

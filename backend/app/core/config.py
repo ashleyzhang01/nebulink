@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     GITHUB_TOKEN: str | None = None
     FETCHAI_API_KEY: str | None = None
     LINKEDIN_PASSWORD_ENCRYPTION_KEY: str
+    HYPERBOLIC_API_KEY: str | None = None
 
     class Config:
         env_file = ".env"
