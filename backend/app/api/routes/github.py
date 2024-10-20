@@ -40,10 +40,11 @@ async def create_github_user(
 
     if existing_github_user:
         # update user id association
+        existing_github_user.user_id = current_user.id
+        existing_github_user.token = github_user.token
+        db.commit()
+        db.refresh(existing_github_user)
         new_github_user = existing_github_user
-        new_github_user.user_id = current_user.id
-        new_github_user.token = github_user.token
-        update_github_user(new_github_user, db)
     else:
         new_github_user = GithubUser(
             username=github_user.username,
@@ -99,7 +100,7 @@ async def sync_github_user(
 
 
 @router.put("/update", response_model=GithubUserSchema)
-async def update_github_user(
+async def update_github_user_info(
     github_user_update: GithubUserCreate,
     db: Session = Depends(get_db)
 ):

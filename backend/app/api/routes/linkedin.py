@@ -46,9 +46,11 @@ async def create_linkedin_user(
     encrypted_password = fernet.encrypt(linkedin_user.password.encode())
     if existing_linkedin_user:
         # update user id association
+        existing_linkedin_user.user_id = current_user.id
+        existing_linkedin_user.password = encrypted_password
+        db.commit()
+        db.refresh(existing_linkedin_user)
         new_linkedin_user = existing_linkedin_user
-        updated_linkedin_user_schema = LinkedinUserCreate(**existing_linkedin_user.dict(exclude={'user_id', 'password'}), user_id=current_user.id, password=encrypted_password)
-        update_linkedin_user(updated_linkedin_user_schema, db)
     else:
         new_linkedin_user = LinkedinUser(
             username=linkedin_user.username,
