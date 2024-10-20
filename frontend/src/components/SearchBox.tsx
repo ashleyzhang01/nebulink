@@ -37,6 +37,23 @@ export default function SearchBox() {
         }
     };
 
+    const handleGenerateMessage = async (name: string | undefined, header: string | undefined) => {
+        const connection_info = (name || "") + (header || "")
+        try {
+            const response = await axios.get('http://localhost:8000/network/message', {
+                // params: {
+                //     query: "Find me information about my Linkedin connection",
+                //     connection_info: connection_info,
+                //     common_with_connection: ""
+                // }
+            })
+        } catch (error) {
+            // TODO: change this to be a real error message
+            console.log("There was an error:", error)
+        }
+        // TODO: success case
+    }; 
+
     const handleInputClick = () => {
         setSearchText("");
     };
@@ -155,6 +172,9 @@ export default function SearchBox() {
                                     <h5 style={{ color: 'white' }}>{user.name}</h5>
                                     <p style={{ color: 'white' }}><strong>Header:</strong> {user.header}</p>
                                     <img src={user.profile_picture} alt="Profile" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                                    <button onClick={() => handleGenerateMessage(user?.name, user?.header)}>
+                                        Send message
+                                    </button>
                                 </div>
                             ))}
                         </div>
