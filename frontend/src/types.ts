@@ -12,15 +12,16 @@ export interface LinkedinOrganization {
 }
 
 export interface GithubUserContribution {
-    username: string,
-    num_contributions: number
+    username: string;
+    num_contributions: number;
 }
 
 export interface Repository {
-    github_users: GithubUserContribution[]
+    github_users: GithubUserContribution[];
 }
 
 export interface SearchResults {
+    search_type: string;
     linkedin_results: LinkedinOrganization[];
     github_results: Repository[];
 }

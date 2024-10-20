@@ -83,7 +83,7 @@ def handle_other_query_func(query: str):
                 "content": query
             }
         ],
-        "model": "meta-llama/Meta-Llama-3-70B-Instruct",
+        "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
         "max_tokens": 2048,
         "temperature": 0.7,
         "top_p": 0.9

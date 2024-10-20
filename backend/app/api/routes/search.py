@@ -89,7 +89,7 @@ async def general_search(
 """
 resulting:
 search_type = "individual" or "company"
-linkedin_results = LinkedinOrganizationSchema(
+linkedin_results = list of LinkedinOrganizationSchema(
             linkedin_id=db_organization.linkedin_id,
             name=db_organization.name,
             description=db_organization.description,
@@ -102,7 +102,7 @@ linkedin_results = LinkedinOrganizationSchema(
             filters=db_organization.filters,
             linkedin_users=linkedin_users
         )
-github_results = RepositorySchema(
+github_results = list of RepositorySchema(
             path=db_repository.path,
             description=db_repository.description,
             stars=db_repository.stars,

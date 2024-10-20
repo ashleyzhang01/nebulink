@@ -40,3 +40,4 @@ frontend/yarn-error.log*
 
 */persistent_chroma_client/
 /backend/persistent_chroma_client
+/backend/sql_app.db
