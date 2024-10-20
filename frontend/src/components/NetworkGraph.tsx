@@ -78,6 +78,10 @@ const NetworkGraph: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [connectedNodes, setConnectedNodes] = useState<{ [groupId: string]: Node[] }>({});
+
 
   useEffect(() => {
     async function fetchNetwork() {
@@ -157,16 +161,27 @@ const NetworkGraph: React.FC = () => {
         .graphData(graphData)
         .backgroundColor('#04041c')
         .nodeAutoColorBy('group_id')
-        .linkWidth(2)
+        .linkWidth(3)
         .nodeThreeObject((node) => {
           const typedNode = node as Node;
           if (typedNode.expanded) {
             const nodeGroup: ExtendedGroup = new THREE.Group();
 
-            const baseSize = typedNode.connection_order === 0 ? 4 : 1 + Math.random() * 3;
+            const baseSize = typedNode.connection_order === 0 ? 3 : 1 + Math.random() * 2;
+
+            const baseColor = new THREE.Color(typedNode.color || 'lightblue');
+            const hsl = { h: 0, s: 0, l: 0 };
+            baseColor.getHSL(hsl);
+
+            // Vary the saturation and lightness slightly
+            const variedColor = new THREE.Color().setHSL(
+              hsl.h,
+              Math.max(0, Math.min(1, hsl.s + (Math.random() - 0.5) * 0.2)),
+              Math.max(0, Math.min(1, hsl.l + (Math.random() - 0.5) * 0.2))
+            );
 
             const sphereGeometry = new THREE.SphereGeometry(baseSize);
-            const sphereMaterial = new THREE.MeshBasicMaterial({ color: typedNode.color || 'lightblue' });
+            const sphereMaterial = new THREE.MeshBasicMaterial({ color: variedColor });
             const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
             nodeGroup.add(sphere);
 
@@ -209,6 +224,24 @@ const NetworkGraph: React.FC = () => {
           const typedNode = node as Node;
           setSelectedNode(typedNode);
           setIsPanelOpen(true);
+          updateConnectedNodes(typedNode);
+
+          if (graphInstance.current && containerRef.current) {
+            const vector = new THREE.Vector3(typedNode.x, typedNode.y, typedNode.z);
+            const canvas = graphInstance.current.renderer().domElement;
+            vector.project(graphInstance.current.camera());
+            
+            const widthHalf = canvas.clientWidth / 2;
+            const heightHalf = canvas.clientHeight / 2;
+            
+            const screenPosition = {
+              x: (vector.x * widthHalf) + widthHalf + containerRef.current.offsetLeft,
+              y: -(vector.y * heightHalf) + heightHalf + containerRef.current.offsetTop
+            };
+            
+            setPanelPosition(screenPosition);
+          }
+
           graphData.nodes.forEach(n => {
             const nodeObject = getNodeObjectById(n.id);
             if (nodeObject && nodeObject.__glowSphere) {
@@ -223,23 +256,14 @@ const NetworkGraph: React.FC = () => {
             nodeObject.__glowSphere.scale.set(1.5, 1.5, 1.5);
           }
 
-          if (activatedGroupId === null || activatedGroupId !== typedNode.group_id) {
-            setActivatedGroupId(typedNode.group_id || null);
-            expandGroupNodes(typedNode.group_id || null);
-            const groupNodeIds = getGroupNodeIds(typedNode.group_id || '');
-            Graph?.zoomToFit(1000, 50, (n) => groupNodeIds.includes((n as Node).id));
-            Graph?.refresh();
-          } else {
-            const x = typedNode.x ?? 0;
-            const y = typedNode.y ?? 0;
-            const z = typedNode.z ?? 0;
-            Graph?.cameraPosition(
-              { x, y, z: z + 100 },
-              { x, y, z },
-              1000
-            );
-            showNodeModal(typedNode);
-          }
+          const x = typedNode.x ?? 0;
+          const y = typedNode.y ?? 0;
+          const z = typedNode.z ?? 0;
+          Graph.cameraPosition(
+            { x, y, z: z + 100 },
+            { x, y, z },
+            1000
+          );
         })
         .onBackgroundClick(() => {
           setSelectedNode(null);
@@ -260,7 +284,7 @@ const NetworkGraph: React.FC = () => {
               (nodeObject.__glowSphere.material as THREE.MeshBasicMaterial).opacity = glowOpacity;
 
               // Apply small force to create gentle movement
-              const forceStrength = 0.3;
+              const forceStrength = 0.1;
               const fx = Math.sin(angle + i * 0.05) * forceStrength;
               const fy = Math.cos(angle + i * 0.05) * forceStrength;
               const fz = Math.sin(angle + i * 0.08) * forceStrength;
@@ -277,8 +301,15 @@ const NetworkGraph: React.FC = () => {
           Graph.refresh();
         }, 50);
 
-        Graph.d3Force('charge')?.strength(-50);
-        Graph.d3Force('link')?.strength(0.5);
+        Graph.d3Force('charge')?.strength(-100);
+        Graph.d3Force('link')?.distance((link: any) => {
+          const sourceNode = graphData.nodes.find(n => n.id === link.source);
+          const targetNode = graphData.nodes.find(n => n.id === link.target);
+          if (sourceNode && targetNode && sourceNode.group_id === targetNode.group_id) {
+            return 100; 
+          }
+          return 50; // Default distance for other links
+        });
         Graph.d3Force('center', null);
         Graph.d3Force('group', forceGroup);
 
@@ -410,9 +441,9 @@ const NetworkGraph: React.FC = () => {
           graphInstance.current.cameraPosition(
             { x, y, z: z + 100 },
             { x, y, z },
-            3000
+            1000
           );
-          closeModal();
+          setSelectedNode(targetNode);
         }
       }
     }
@@ -420,16 +451,60 @@ const NetworkGraph: React.FC = () => {
     if (isLoading) {
       return <div>Loading...</div>;
     }
+
+    const updateConnectedNodes = (node: Node) => {
+      if (!graphData) return;
+  
+      const connected: { [groupId: string]: Node[] } = {};
+      graphData.links.forEach(link => {
+        if (link.source === node.id || link.target === node.id) {
+          const connectedNodeId = link.source === node.id ? link.target : link.source;
+          const connectedNode = graphData.nodes.find(n => n.id === connectedNodeId);
+          if (connectedNode && connectedNode.group_id) {
+            if (!connected[connectedNode.group_id]) {
+              connected[connectedNode.group_id] = [];
+            }
+            connected[connectedNode.group_id].push(connectedNode);
+          }
+        }
+      });
+      setConnectedNodes(connected);
+    };
+
+    const handleConnectedNodeClick = (nodeId: number) => {
+      const clickedNode = graphData?.nodes.find(n => n.id === nodeId);
+      if (clickedNode) {
+        setSelectedNode(clickedNode);
+        updateConnectedNodes(clickedNode);
+        // Center camera on clicked node
+        if (graphInstance.current) {
+          const x = clickedNode.x ?? 0;
+          const y = clickedNode.y ?? 0;
+          const z = clickedNode.z ?? 0;
+          graphInstance.current.cameraPosition(
+            { x, y, z: z + 100 },
+            { x, y, z },
+            1000
+          );
+        }
+      }
+    };
   
     if (!graphData) {
       return <div>No data available. Please try again later.</div>;
     }
   
     return (
-      <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-        <div ref={graphRef} style={{ width: '100vw', height: '100vh' }} />
+      <div style={{ position: 'relative', width: '100vw', height: '90vh' }}>
+        <div ref={graphRef} style={{ width: '100vw', height: '90vh' }} />
         {isPanelOpen && selectedNode && (
-        <div style={panelStyles}>
+          <div style={{
+            ...panelStyles,
+            position: 'absolute',
+            right: '20px',
+            top: '20px',
+          }}>
+            <div style={caretStyles}></div>
           <button onClick={() => setIsPanelOpen(false)} style={closeButtonStyles}>Close</button>
           <h2>{selectedNode.individual_name}</h2>
           <p><strong>Username:</strong> {selectedNode.username}</p>
@@ -440,26 +515,21 @@ const NetworkGraph: React.FC = () => {
           <a href={selectedNode.link} target="_blank" rel="noopener noreferrer" style={linkStyles}>
             Visit Profile
           </a>
-          {selectedNode.corresponding_user_nodes.length > 0 && (
-            <div>
-              <h3>Corresponding Profiles:</h3>
-              {selectedNode.corresponding_user_nodes.map(nodeId => {
-                const correspondingNode = graphData?.nodes.find(n => n.id === nodeId);
-                if (correspondingNode) {
-                  return (
-                    <button 
-                      key={nodeId} 
-                      onClick={() => handleCorrespondingNodeClick(nodeId)}
-                      style={correspondingNodeButtonStyles}
-                    >
-                      {correspondingNode.username} ({correspondingNode.is_linkedin ? 'LinkedIn' : 'GitHub'})
-                    </button>
-                  );
-                }
-                return null;
-              })}
-              </div>
-            )}
+          <h3>Connected Nodes:</h3>
+          {Object.entries(connectedNodes).map(([groupId, nodes]) => (
+            <div key={groupId}>
+              <h4>{graphData?.groups.find(g => g.id === groupId)?.name}</h4>
+              {nodes.map(node => (
+                <button
+                  key={node.id}
+                  onClick={() => handleConnectedNodeClick(node.id)}
+                  style={correspondingNodeButtonStyles}
+                >
+                  {node.individual_name || node.username}
+                </button>
+              ))}
+            </div>
+          ))}
           </div>
         )}
       </div>
@@ -497,15 +567,15 @@ const profilePictureModalStyles: React.CSSProperties = {
 };
 
 const panelStyles: React.CSSProperties = {
-  position: 'absolute',
   width: '300px',
-  backgroundColor: 'rgba(0, 0, 0, 0.6)', // More transparent background
+  backgroundColor: 'rgba(0, 0, 0, 0.8)',
   color: 'white',
-  padding: '20px',
-  borderRadius: '10px',
+  padding: '15px',
+  borderRadius: '8px',
   overflowY: 'auto',
-  maxHeight: 'calc(100vh - 20px)',
-  zIndex: 1000,
+  maxHeight: 'calc(100vh - 40px)',
+  zIndex: 10,
+  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 };
 
 const correspondingNodeButtonStyles: React.CSSProperties = {
@@ -516,6 +586,18 @@ const correspondingNodeButtonStyles: React.CSSProperties = {
   margin: '5px',
   cursor: 'pointer',
   borderRadius: '5px',
+};
+
+const caretStyles: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '-10px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: 0,
+  height: 0,
+  borderLeft: '10px solid transparent',
+  borderRight: '10px solid transparent',
+  borderTop: '10px solid rgba(0, 0, 0, 0.8)',
 };
 
 const linkStyles: React.CSSProperties = {

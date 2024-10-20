@@ -225,7 +225,7 @@ async def get_public_network(db: Session) -> Dict[str, List]:
                     process_github_repository(other_repo.path)
 
     # Start processing from all LinkedIn organizations
-    linkedin_organizations = db.query(LinkedinOrganization).offset(0).limit(500).all()
+    linkedin_organizations = db.query(LinkedinOrganization).offset(0).limit(200).all()
     
     if not linkedin_organizations:
         raise HTTPException(status_code=404, detail="No LinkedIn organizations found")
