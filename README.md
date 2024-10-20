@@ -1,7 +1,10 @@
 # nebulink
 
+<img width="1691" alt="Screenshot 2024-10-20 at 9 23 55 AM" src="https://github.com/user-attachments/assets/7c5c44d7-b526-45ec-b6bd-82bfe4319ab3">
+
 ## Inspiration
-Have you ever spent hours trying to find the right person—whether it’s a hire, a mentor, or a collaborator—only to feel like the process was inefficient and hit-or-miss? It’s not just about finding talent; it’s about finding people who align with your goals, bring positive value, and fit into your long-term vision. 
+Have you ever spent hours trying to find the right person—whether it’s a hire, a mentor, or a collaborator—only to feel like the process was inefficient and hit-or-miss? It’s not just about finding talent; it’s about finding people who align with your goals, bring positive value, and fit into your long-term vision.
+
 
 The problem? This process is time-consuming and often reliant on referrals or alumni networks, making it hard to discover the best-fit individuals. That’s why we built this platform: **to automate parts of the process while increasing its human-centered essence.** We don’t just help users search for people or talent—we enable them to **understand their network, foster genuine connections, and make strategic decisions** with visibility into how people and companies relate to one another.
 
