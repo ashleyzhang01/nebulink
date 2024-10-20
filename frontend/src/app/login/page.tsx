@@ -24,7 +24,7 @@ export default function Login() {
         }
       )
       localStorage.setItem('token', response.data.access_token)
-      router.push('/settings')
+      router.push('/')
     } catch (error) {
       console.error('Login error:', error)
     }
