@@ -48,7 +48,7 @@ export default function SearchBox() {
                         value={searchText}
                         onChange={handleChange}
                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        placeholder="What are you looking to bring to your network?"
+                        placeholder="Discover knowledge, skills, or contacts—what do you need?"
                         style={{
                             flex: 1,
                             padding: '10px',
@@ -123,10 +123,10 @@ export default function SearchBox() {
                     color: 'black'
                 }}>
                     <h3 style={{ color: 'black' }}>Individual Results</h3>
-                    {results.linkedin_results?.length > 0 && (
+                    {results.linkedin_user_results?.length > 0 && (
                         <div>
                             <h4 style={{ color: '#0077B5' }}>LinkedIn Users:</h4>
-                            {results.linkedin_results.map((org: any, index) => (
+                            {results.linkedin_user_results.map((user: any, index) => (
                                 <div key={index} style={{ 
                                     margin: '10px 0', 
                                     padding: '10px', 
@@ -134,14 +134,9 @@ export default function SearchBox() {
                                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                                     color: 'black'
                                 }}>
-                                    <h5 style={{ color: 'black' }}>{org.name}</h5>
-                                    {org.linkedin_users && org.linkedin_users.map((user: any, userIndex: number) => (
-                                        <div key={userIndex} style={{ marginTop: '10px' }}>
-                                            <img src={user.profile_picture} alt="Profile" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
-                                            <p style={{ color: 'black' }}><strong>Name:</strong> {user.name}</p>
-                                            <p style={{ color: 'black' }}><strong>Header:</strong> {user.header}</p>
-                                        </div>
-                                    ))}
+                                    <h5 style={{ color: 'black' }}>{user.name}</h5>
+                                    <p style={{ color: 'black' }}><strong>Header:</strong> {user.header}</p>
+                                    <img src={user.profile_picture} alt="Profile" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
                                 </div>
                             ))}
                         </div>

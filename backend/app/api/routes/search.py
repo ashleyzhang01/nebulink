@@ -8,6 +8,7 @@ from app.chromadb.dataclass import ChromaResult
 from app.chromadb.internal_api import query_from_chroma
 from app.db.linkedin_organization_functions import get_linkedin_organization_by_id
 from app.models.linkedin_organization import LinkedinOrganization
+from app.models.linkedin_user import LinkedinUser
 from app.models.repository import Repository
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -15,6 +16,7 @@ from app.db.session import get_db
 from app.schemas.search import GeneralQuerySchema, LinkedinQuerySchema
 from app.utils.enums import ChromaCollections
 from app.db.repository_functions import get_repository_by_path
+from app.db.linkedin_user_functions import get_users_by_organization
 
 
 router = APIRouter(prefix="/search", tags=["search"])
@@ -70,6 +72,8 @@ async def general_search(
     print(chroma_results)
 
     linkedin_results: list[LinkedinOrganization] = []
+    linkedin_user_results: list[LinkedinUser] = []
+
 
     for chroma_result_id in chroma_results.get('ids')[0]:
         linkedin_results.append(
@@ -78,13 +82,19 @@ async def general_search(
                 db=db,
             )
         )
+        users = get_users_by_organization(
+            db=db,
+            organization_id=chroma_result_id,
+        )
+        for user in users:
+            linkedin_user_results.append(user)
 
     github_results: list[Repository] = []
 
     print("linkedin: ", linkedin_results)
     print("github: ", github_results)
 
-    return GeneralQuerySchema(search_type=classification, linkedin_results=linkedin_results, github_results=github_results)
+    return GeneralQuerySchema(search_type=classification, linkedin_results=linkedin_results, linkedin_user_results=linkedin_user_results, github_results=github_results)
 
 """
 resulting:

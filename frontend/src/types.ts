@@ -16,6 +16,15 @@ export interface GithubUserContribution {
     num_contributions: number;
 }
 
+export interface LinkedinUser {
+    username: string;
+    name: string;
+    header: string;
+    profile_picture: string;
+    email: string;
+    external_websites: string;
+}
+
 export interface Repository {
     github_users: GithubUserContribution[];
 }
@@ -23,5 +32,6 @@ export interface Repository {
 export interface SearchResults {
     search_type: string;
     linkedin_results: LinkedinOrganization[];
+    linkedin_user_results: LinkedinUser[]
     github_results: Repository[];
 }
