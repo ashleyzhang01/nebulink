@@ -1,4 +1,4 @@
 #!/bin/bash
-flake8 .
-ruff check .
+flake8 . --fix
+ruff check . --fix
 mypy .

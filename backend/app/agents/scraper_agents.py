@@ -1,11 +1,7 @@
-from app.models.github_user import GithubUser
-from pydantic import BaseModel
 from typing import Optional
 from uagents import Agent, Context, Model
 from app.db.session import SessionLocal
-from app.schemas import User as UserSchema, GithubUser as GithubUserSchema, LinkedinUser as LinkedinUserSchema
 from app.agents.github_scraper_agent_helper import get_github_user_2_degree_network
-import asyncio
 
 
 agent = Agent(

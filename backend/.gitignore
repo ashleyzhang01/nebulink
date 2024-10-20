@@ -1,1 +1,2 @@
 chromadb/persistent_chroma_client/
+.env

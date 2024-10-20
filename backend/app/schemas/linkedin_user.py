@@ -4,7 +4,7 @@ from typing import Optional, List
 import json
 
 if typing.TYPE_CHECKING:
-    from app.schemas.user import User
+    pass
 
 
 class LinkedinOrganizationContribution(BaseModel):

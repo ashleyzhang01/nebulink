@@ -3,11 +3,11 @@ from app.agents.github_scraper_agent_helper import get_github_user_2_degree_netw
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models import User, GithubUser, Repository
+from app.models import User, GithubUser
 from app.schemas import GithubUserCreate, GithubUser as GithubUserSchema, Repository as RepositorySchema
 from app.db.user_functions import get_current_user
 from app.db.repository_functions import get_all_repositories
-from app.agents.scraper_agents import GithubRequest, Response
+from app.agents.scraper_agents import GithubRequest
 from uagents.query import query
 import json
 from typing import List
