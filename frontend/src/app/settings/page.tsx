@@ -74,7 +74,7 @@ export default function Settings() {
               id="githubUsername"
               value={githubUsername}
               onChange={(e) => setGithubUsername(e.target.value)}
-              className="w-full p-2 border rounded bg-opacity-50 bg-white"
+              className="w-full p-2 rounded bg-opacity-20 bg-white"
               required
             />
           </div>
@@ -85,10 +85,10 @@ export default function Settings() {
               id="githubToken"
               value={githubToken}
               onChange={(e) => setGithubToken(e.target.value)}
-              className="w-full p-2 border rounded bg-opacity-50 bg-white"
+              className="w-full p-2 rounded bg-opacity-20 bg-white"
             />
           </div>
-          <button type="submit" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          <button type="submit" className="bg-gray-700 opacity-30 text-white px-4 py-2 rounded hover:bg-gray-900">
             set github user
           </button>
         </form>
@@ -104,7 +104,7 @@ export default function Settings() {
               id="linkedinEmail"
               value={linkedinEmail}
               onChange={(e) => setLinkedinEmail(e.target.value)}
-              className="w-full p-2 border rounded bg-opacity-50 bg-white"
+              className="w-full p-2 rounded bg-opacity-20 bg-white"
               required
             />
           </div>
@@ -115,10 +115,10 @@ export default function Settings() {
               id="linkedinPassword"
               value={linkedinPassword}
               onChange={(e) => setLinkedinPassword(e.target.value)}
-              className="w-full p-2 border rounded bg-opacity-50 bg-white"
+              className="w-full p-2 rounded bg-opacity-20 bg-white"
             />
           </div>
-          <button type="submit" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          <button type="submit" className="bg-gray-700 opacity-30 text-white px-4 py-2 rounded hover:bg-gray-900">
             set linkedin user
           </button>
         </form>

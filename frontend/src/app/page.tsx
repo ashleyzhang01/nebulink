@@ -9,6 +9,11 @@ const NetworkGraph = dynamic(() => import('../components/NetworkGraph'), {
   loading: () => <p>Loading...</p>
 });
 
+const PublicNetworkGraph = dynamic(() => import('../components/PublicNetworkGraph'), {
+  ssr: false,
+  loading: () => <p>Loading public network...</p>
+});
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -20,20 +25,7 @@ export default function Home() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       {/* <SearchBox /> */}
-      {isLoggedIn ? (
-        <NetworkGraph />
-      ) : (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100%',
-          fontSize: '1.5rem',
-          color: '#333'
-        }}>
-          Please log in to view the network graph.
-        </div>
-      )}
+      {isLoggedIn ? <NetworkGraph /> : <PublicNetworkGraph />}
     </div>
   );
 }
