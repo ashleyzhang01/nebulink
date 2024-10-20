@@ -29,6 +29,7 @@ async def create_github_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    print("entered")
     # Check if the GitHub user already exists for the current user
     existing_github_user = db.query(GithubUser).filter(
         GithubUser.username == github_user.username,

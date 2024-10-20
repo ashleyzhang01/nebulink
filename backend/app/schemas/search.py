@@ -9,5 +9,6 @@ class LinkedinQuerySchema(BaseModel):
 
 
 class GeneralQuerySchema(BaseModel):
+    search_type: str
     linkedin_results: list[LinkedinOrganization]
     github_results: list[Repository]

@@ -2,6 +2,7 @@ from typing import Optional
 from uagents import Agent, Context, Model
 from app.db.session import SessionLocal
 from app.agents.github_scraper_agent_helper import get_github_user_2_degree_network
+from app.agents.linkedin_scraper_agent_helper import get_linkedin_user_2_degree_network
 
 
 agent = Agent(
@@ -23,6 +24,7 @@ class GithubRequest(Model):
 class LinkedinRequest(Model):
     email: str
     password: str
+    username: str
 
 class Response(Model):
     text: str
@@ -76,7 +78,7 @@ async def linkedin_query_handler(ctx: Context, sender: str, _query: LinkedinRequ
     try:
         db = SessionLocal()
         try:
-            get_linkedin_user_2_degree_network(_query.email, _query.password, db)
+            get_linkedin_user_2_degree_network(_query.email, _query.username, _query.password, db)
             await ctx.send(sender, Response(text="success"))   
         finally:
             db.close()

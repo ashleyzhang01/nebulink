@@ -83,27 +83,26 @@ async def classify_query(ctx: Context, sender: str, msg: Message):
 
 def classify_query_func(query: str):
     system_message = """
-    Based on the input, determine if the user is looking for someone who works at a specific company or someone who is skilled/experienced in a certain area. 
-    You are simply classifying whether the user is doing a company-first search or something else. 
-    You must only output “company” or “other” with no additional text so this can be passed in as a parameter. This is critical.
+    Based on the input, determine if the user is looking for a company or an individual.
+    You must only output “company” or "individual" with no additional text so this can be passed in as a parameter. This is critical.
 
-    If the user is looking for someone who works at a company, their queries will always include a company name or include the word company like so:
-    “Who is working at Google”
-    “Software engineer at Google”
-    "Who is working at a biotech startup"
+    If the user is looking for a company, their queries will always include a company name or include the word company or a synonym (like startup) like so:
+    “Companies in biotech"
+    "ai startups"
 
-    Otherwise, their queries do not mention a specific company or request one, and instead they ask for specific skills or projects they worked on like so:
+    If the user is looking for an individual, their queries will ask for the individuals of some kind of speciality:
     “Someone who’s good at low level programming”
     “People working on ai interpretability”
 
-    Again, you must only respond with “company” or “other”.
+    Again, you must only respond with “company” or "individual".
 
     For example,
-    Input: Who is working at Google
+    Input: companies in biotech
     Output: company
 
     input: Someone who’s good at low level programming
-    output: other
+    output: individual
+
     """
     
     url = "https://api.hyperbolic.xyz/v1/chat/completions"

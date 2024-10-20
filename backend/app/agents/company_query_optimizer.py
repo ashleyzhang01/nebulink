@@ -68,12 +68,12 @@ async def handle_company_query(ctx: Context, sender: str, msg: Message):
 def handle_company_query_func(query: str):
     system_message = """
     Given a user query, your role is to optimize it to query into a vector database of embeddings. 
-    The user is looking for a company or companies in a specific area, so you should use keywords that will best optimize for querying over a company's description (includes company name, industries, specialities, etc.). 
+    The user is looking for companies in a specific area, so you should use keywords that will best optimize for querying over a company's description (includes company name, industries, specialities, etc.). 
     If the user includes a specific company's name, make sure to include that name and additional keywords. If the user only mentions the area of the company they are looking for, just include keywords that may be the most relevant.
 
-    For example, the user may ask "who is working at groq", you would optimize that to be "groq fast LLM inference LPU"
+    For example, the user may ask "companies working on bioml", you would optimize that to be "biotech protein ai modeling therapeutics"
 
-    Another example is: the user may ask "who is working at a biotech startup", you would optimize that to be "biotech protein ai modeling therapeutics"
+    Another example is: the user may ask "startups working on ai interpretability", you would optimize that to be "interpretability ai ml features intrepret langauge models LLM"
 
     Simply output the optimized query without any additional text so your response can be directly used to query into the vector database.
     """
