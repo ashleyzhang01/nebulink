@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter
-
+from app.chromadb import get_chroma_collection
 from app.agents.classifier import classify_query_func
 from app.agents.company_query_optimizer import handle_company_query_func
 from app.agents.other_query_optimizer import handle_other_query_func
@@ -14,26 +14,30 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.search import GeneralQuerySchema, LinkedinQuerySchema
 from app.utils.enums import ChromaCollections
-from backend.app.db.repository_functions import get_repository_by_path
+from app.db.repository_functions import get_repository_by_path
 
 
-router = APIRouter(prefix="/network", tags=["network"])
+router = APIRouter(prefix="/search", tags=["search"])
 
 
-@router.get("/search", response_model=GeneralQuerySchema)
+@router.get("/perform_search", response_model=GeneralQuerySchema)
 async def general_search(
     query: str,
     db: Session = Depends(get_db)
 ):
+    print("entered general search func")
+    """
     classification = classify_query_func(query=query)
     github_results: list[Repository] = []
 
     if classification == "other":
         optimized_query = handle_other_query_func(query=query)
+        print("Optimized query: ", optimized_query)
+
         github_chroma_results: list[ChromaResult] = query_from_chroma(
             query=optimized_query,
-            n_results=5,
             collection=ChromaCollections.GITHUB_REPOSITORY,
+            n_results=5,
         )
 
         for github_chroma_result in github_chroma_results:
@@ -45,10 +49,14 @@ async def general_search(
             )
         
     optimized_query = handle_company_query_func(query=query)
-    chroma_results: list[ChromaResult] = query_from_chroma(
-        query=optimized_query,
-        n_results=5,
-        collection=ChromaCollections.LINKEDIN_ORGANIZATION,
+"""
+    optimized_query = "ai startup biotech"
+    print("Optimized query: ", optimized_query)
+
+    print(get_chroma_collection(ChromaCollections.LINKEDIN_ORGANIZATION).count())
+    chroma_results = get_chroma_collection(ChromaCollections.LINKEDIN_ORGANIZATION).query(
+        query_texts = optimized_query,
+        n_results = 5
     )
 
     linkedin_results: list[LinkedinOrganization] = []
@@ -59,6 +67,8 @@ async def general_search(
                 db=db,
             )
         )
+    print(linkedin_results)
+    github_results: list[Repository] = []
 
     return GeneralQuerySchema(linkedin_results=linkedin_results, github_results=github_results)
 
