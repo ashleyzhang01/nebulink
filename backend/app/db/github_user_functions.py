@@ -2,7 +2,7 @@ from typing import List
 from app.models.github_user import GithubUser, GithubUserRepositoryMap
 from app.schemas.github_user import RepositoryContribution
 from sqlalchemy.orm import Session
-from app.schemas import GithubUser as GithubUserSchema, Repository as RepositorySchema
+from app.schemas import GithubUser as GithubUserSchema
 
 
 def create_github_user(github_user: GithubUserSchema, db: Session):

@@ -16,7 +16,6 @@ class RepositoryBase(BaseModel):
 class RepositoryCreate(RepositoryBase):
     pass
 
-
 class Repository(RepositoryBase):
     github_users: List[GithubUserContribution] = []
 

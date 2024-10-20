@@ -1,22 +1,18 @@
-from app.db.github_user_functions import update_github_user
-from app.agents.github_scraper_agent_helper import get_github_user_2_degree_network
 from app.agents.linkedin_scraper_agent_helper import get_linkedin_user_2_degree_network
-from app.db.linkedin_user_functions import get_linkedin_user_by_username, get_user_organization_associations, update_linkedin_user
-from app.schemas.linkedin_user import LinkedinOrganizationContribution, LinkedinUserInDB
+from app.db.linkedin_user_functions import get_user_organization_associations, update_linkedin_user
+from app.schemas.linkedin_user import LinkedinOrganizationContribution
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models import User, LinkedinUser, LinkedinOrganization
 from app.schemas import LinkedinUserCreate, LinkedinUser as LinkedinUserSchema, LinkedinOrganization as LinkedinOrganizationSchema
 from app.db.user_functions import get_current_user
-from app.db.repository_functions import get_all_repositories
-from app.agents.scraper_agents import LinkedinRequest, Response
+from app.agents.scraper_agents import LinkedinRequest
 from uagents.query import query
 import json
 from typing import List
 from cryptography.fernet import Fernet
 from app.core.config import settings
-import base64
 
 router = APIRouter(prefix="/linkedin", tags=["linkedin"])
 

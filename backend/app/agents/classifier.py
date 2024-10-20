@@ -1,6 +1,6 @@
 from company_query_optimizer import company_query_optimizer_agent
 from other_query_optimizer import other_query_optimizer_agent
-from uagents import Agent, Bureau, Context, Model
+from uagents import Agent, Context, Model
 import requests
 import os
 
