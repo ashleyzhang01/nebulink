@@ -26,7 +26,7 @@ async def general_search(
     db: Session = Depends(get_db)
 ):
     print("entered general search func")
-    """
+    
     classification = classify_query_func(query=query)
     github_results: list[Repository] = []
 
@@ -49,11 +49,9 @@ async def general_search(
             )
         
     optimized_query = handle_company_query_func(query=query)
-"""
-    optimized_query = "ai startup biotech"
+
     print("Optimized query: ", optimized_query)
 
-    print(get_chroma_collection(ChromaCollections.LINKEDIN_ORGANIZATION).count())
     chroma_results = get_chroma_collection(ChromaCollections.LINKEDIN_ORGANIZATION).query(
         query_texts = optimized_query,
         n_results = 5
