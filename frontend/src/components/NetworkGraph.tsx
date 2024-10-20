@@ -43,6 +43,8 @@ interface Node extends BaseNodeObject {
   color?: string;
 }
 
+
+
 interface Link {
   source: number;
   target: number;
@@ -75,6 +77,8 @@ const NetworkGraph: React.FC = () => {
   const graphInstance = useRef<ForceGraph3DInstance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [messageQuery, setMessageQuery] = useState<string>('');
+  const [showMessageTooltip, setShowMessageTooltip] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -153,6 +157,66 @@ const NetworkGraph: React.FC = () => {
     return undefined;
   };
 
+  interface MessageData {
+    query: string,
+    connection_info: string,
+    common_with_connection: string,
+  }
+
+  const handleGenerateMessage = async () => {
+    if (selectedNode == null) {
+      return
+    }
+    const connection_info = (selectedNode.header || "") + (selectedNode.group_id || "")
+    try {
+      const response = await axios.post('http://localhost:8000/api/linkedin/create', {
+        query: messageQuery,
+        connection_info: connection_info,
+        common_with_connection: selectedNode.group_id || ""
+      }, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+    } catch (error) {
+      // TODO: change this to be a real error message
+      console.log("There was an error:", error)
+    }
+    // TODO: success case
+  }; 
+
+  const TooltipButton = () => {
+    return (
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <button onClick={() => {setShowMessageTooltip(!showMessageTooltip)}} style={sendMessageButtonStyles}>
+          Message
+        </button>
+
+        {showMessageTooltip && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '110%', /* Adjust to position below the button */
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: '#333',
+              color: '#fff',
+              padding: '5px 10px',
+              borderRadius: '4px',
+              whiteSpace: 'nowrap',
+              zIndex: 1,
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Enter message here"
+              style={{ padding: '5px', borderRadius: '4px', width: '150px' }}
+            />
+            <button style={sendMessageButtonStyles}></button>
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   const initializeGraph = () => {
     if (!graphData || !graphRef.current) return;
 
@@ -518,6 +582,7 @@ const NetworkGraph: React.FC = () => {
                   Visit Profile
                 </a>
               )}
+              {/* {selectedNode.header && selectedNode.group_id && <TooltipButton />} */}
             </div>
           </div>
           {selectedNode.corresponding_user_nodes.length > 0 && (
@@ -622,6 +687,12 @@ const correspondingNodesContainerStyles: React.CSSProperties = {
   maxWidth: '100%', 
 };
 
+const sendMessageButtonStyles: React.CSSProperties = {
+  background: 'rgb(173, 216, 230)', /* Light blue background */
+  border: 'none', /* Remove default border */
+  color: 'white', /* Text color */
+  padding: '10px 20px', /* Padding around the text */
+}
 
 const caretStyles: React.CSSProperties = {
   position: 'absolute',
