@@ -2,7 +2,7 @@ from typing import List, Tuple
 from app.models.linkedin_user import LinkedinUser, LinkedinUserOrganizationMap
 from app.schemas.linkedin_user import LinkedinUser as LinkedinUserSchema, LinkedinOrganizationContribution, LinkedinUserCreate
 from app.schemas.linkedin_organization import LinkedinUserContribution
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import json
 from cryptography.fernet import Fernet
 from app.core.config import settings
@@ -89,3 +89,14 @@ def update_linkedin_user(linkedin_user: LinkedinUserCreate, db: Session) -> Link
         user_dict['organizations'] = organizations
         return LinkedinUserSchema(**user_dict)
     return None
+
+
+def get_users_by_organization(db: Session, organization_id: str) -> List[LinkedinUser]:
+    users = (
+        db.query(LinkedinUser)
+        .join(LinkedinUserOrganizationMap)
+        .filter(LinkedinUserOrganizationMap.linkedin_organization_id == organization_id)
+        .options(joinedload(LinkedinUser.organization_maps))  # To load the related organization maps
+        .all()
+    )
+    return users
