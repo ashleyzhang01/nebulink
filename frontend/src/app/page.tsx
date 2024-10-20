@@ -26,7 +26,13 @@ export default function Home() {
       {isLoggedIn ? (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
           {/* Overlayed SearchBox */}
-          <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10 }}>
+          <div style={{ 
+            position: 'absolute', 
+            top: '70px', 
+            left: '50%', 
+            transform: 'translateX(-50%)', 
+            zIndex: 10 
+          }}>
             <SearchBox />
           </div>
 
