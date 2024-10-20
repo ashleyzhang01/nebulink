@@ -84,6 +84,14 @@ async def get_user_network(user_id: int, db: Session) -> Dict[str, List]:
                         "is_linkedin": True
                     })
 
+        for node in user_nodes:
+            node["corresponding_user_nodes"] = [
+                other_node["id"] for other_node in nodes
+                if other_node["username"] == node["username"] and
+                other_node["is_linkedin"] == node["is_linkedin"] and
+                other_node["group_id"] != node["group_id"]
+            ]
+
         # Check for corresponding GitHub user
         github_user = get_associated_github_user(linkedin_user.user_id, db)
         if github_user:
@@ -116,6 +124,14 @@ async def get_user_network(user_id: int, db: Session) -> Dict[str, List]:
                     "stars": repo.stars,
                     "link": f"https://github.com/{repo.path}"
                 })
+
+        for node in user_nodes:
+            node["corresponding_user_nodes"] = [
+                other_node["id"] for other_node in nodes
+                if other_node["username"] == node["username"] and
+                other_node["is_linkedin"] == node["is_linkedin"] and
+                other_node["group_id"] != node["group_id"]
+            ]
 
         linkedin_user = get_associated_linkedin_user(github_user.user_id, db)
         if linkedin_user:
