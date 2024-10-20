@@ -29,6 +29,7 @@ async def general_search(
     
     classification = classify_query_func(query=query)
     github_results: list[Repository] = []
+    print(classification)
 
     if classification == "other":
         optimized_query = handle_other_query_func(query=query)
@@ -56,6 +57,9 @@ async def general_search(
         query_texts = optimized_query,
         n_results = 5
     )
+
+    print(get_chroma_collection(ChromaCollections.LINKEDIN_ORGANIZATION).count())
+    print(get_chroma_collection(ChromaCollections.GITHUB_REPOSITORY).count())
 
     print(chroma_results)
 
